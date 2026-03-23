@@ -394,7 +394,7 @@
             }
         });
 
-        // Dosya Aç
+        // Dosya Aç İşlemi (HATA DÜZELTİLDİ)
         document.getElementById('menuOpen').addEventListener('click', () => {
             fileInput.click();
             mainMenu.classList.remove('active');
@@ -403,17 +403,28 @@
         fileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (!file) return;
+            
             const reader = new FileReader();
             reader.onload = (e) => {
+                const content = e.target.result;
                 const activeTab = tabs.find(t => t.id === activeTabId);
+                
+                // Doğrudan sekme verilerini güncelle (üzerine yazmayı önler)
                 activeTab.name = file.name;
-                activeTab.content = e.target.result;
-                activeTab.history = [e.target.result];
+                activeTab.content = content;
+                activeTab.history = [content];
                 activeTab.historyIndex = 0;
-                switchTab(activeTabId);
+
+                // Editör içeriğini anında değiştir
+                isProgrammaticChange = true;
+                editor.value = content;
+                fileNameDisplay.textContent = file.name;
+                
+                renderTabs();
+                updateLineNumbers();
             };
             reader.readAsText(file);
-            fileInput.value = '';
+            fileInput.value = ''; // Aynı dosyayı tekrar seçebilmek için sıfırla
         });
 
         // Kaydetme İşlevleri
@@ -565,6 +576,14 @@
         // İlk sekmeyi başlat
         createTab();
 
+        // PWA Service Worker (Kaldırılmadı)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => console.log('SW kayıtlı:', registration.scope))
+                    .catch(error => console.log('SW kayıt hatası:', error));
+            });
+        }
     </script>
 </body>
 </html>
