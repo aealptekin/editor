@@ -1,575 +1,371 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-	<title></title>
-	<meta name="generator" content="LibreOffice 7.6.4.1 (Linux)"/>
-	<meta name="created" content="00:00:00"/>
-	<meta name="changed" content="00:00:00"/>
-	<style type="text/css">
-		@page { size: 8.27in 11.69in; margin: 0.79in }
-		p { line-height: 115%; margin-bottom: 0.1in; background: transparent }
-		pre { background: transparent }
-		pre.western { font-family: "Liberation Mono", monospace; font-size: 10pt }
-		pre.cjk { font-family: "NSimSun", monospace; font-size: 10pt }
-		pre.ctl { font-family: "Liberation Mono", monospace; font-size: 10pt }
-	</style>
-</head>
-<body lang="en-US" link="#000080" vlink="#800000" dir="ltr"><pre class="western">&lt;!DOCTYPE html&gt;
-
-&lt;html lang=&quot;tr&quot;&gt;
-
-&lt;head&gt;
-
-    &lt;meta charset=&quot;UTF-8&quot;&gt;
-
-    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover&quot;&gt;
-
-    &lt;meta name=&quot;apple-mobile-web-app-capable&quot; content=&quot;yes&quot;&gt;
-
-    &lt;meta name=&quot;apple-mobile-web-app-status-bar-style&quot; content=&quot;default&quot;&gt;
-
-    &lt;title&gt;iOS Editör&lt;/title&gt;
-
-    &lt;link rel=&quot;manifest&quot; href=&quot;manifest.json&quot;&gt;
-
-    &lt;style&gt;
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>AlpEditör</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
         /* iPhone (iOS) Stili CSS */
-
         :root {
-
             --ios-bg: #f2f2f7;
-
             --ios-header: #f8f8f8;
-
             --ios-blue: #007AFF;
-
             --ios-border: #c6c6c8;
-
             --ios-text: #000000;
-
+            --ios-menu-bg: rgba(30, 30, 30, 0.85);
         }
-
-
 
         body {
-
             margin: 0;
-
             padding: 0;
-
-            font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif;
-
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--ios-bg);
-
             display: flex;
-
             flex-direction: column;
-
             height: 100vh;
-
             overflow: hidden;
-
+            -webkit-tap-highlight-color: transparent;
         }
-
-
 
         header {
-
             background-color: var(--ios-header);
-
             border-bottom: 1px solid var(--ios-border);
-
             display: flex;
-
             justify-content: space-between;
-
             align-items: center;
-
             padding: 10px 15px;
-
             padding-top: max(10px, env(safe-area-inset-top));
-
         }
-
-
 
         .toolbar {
-
             background-color: var(--ios-header);
-
             border-bottom: 1px solid var(--ios-border);
-
             display: flex;
-
             justify-content: space-between;
-
             align-items: center;
-
             padding: 8px 15px;
-
         }
-
-
 
         .btn {
-
             color: var(--ios-blue);
-
             background: transparent;
-
             border: none;
-
             font-size: 17px;
-
             cursor: pointer;
-
-            padding: 0;
-
+            padding: 5px;
             margin: 0;
-
+            outline: none;
         }
-
-
 
         .btn:active {
-
             opacity: 0.5;
-
         }
-
-
 
         .title {
-
             font-size: 17px;
-
             font-weight: 600;
-
             color: var(--ios-text);
-
             flex: 1;
-
             text-align: center;
-
             white-space: nowrap;
-
             overflow: hidden;
-
             text-overflow: ellipsis;
-
             padding: 0 10px;
-
         }
-
-
 
         textarea {
-
             flex: 1;
-
             width: 100%;
-
             border: none;
-
             padding: 15px;
-
             font-size: 16px;
-
             font-family: monospace;
-
             background-color: #ffffff;
-
             color: var(--ios-text);
-
             resize: none;
-
             outline: none;
-
             box-sizing: border-box;
-
             -webkit-appearance: none;
-
         }
 
-
-
-        input[type=&quot;file&quot;] {
-
+        input[type="file"] {
             display: none;
-
         }
 
-    &lt;/style&gt;
+        /* iOS Stili Açılır Menü (Kopyala/Yapıştır) */
+        .ios-context-menu {
+            position: absolute;
+            background-color: var(--ios-menu-bg);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: row;
+            padding: 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            transform: scale(0.95);
+            opacity: 0;
+            pointer-events: none;
+        }
 
-&lt;/head&gt;
+        .ios-context-menu.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
 
-&lt;body&gt;
+        .ios-context-menu button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 14px;
+            padding: 10px 14px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
 
+        .ios-context-menu button:active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
 
+        .ios-context-menu .divider {
+            width: 1px;
+            background-color: rgba(255, 255, 255, 0.2);
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
 
-    &lt;header&gt;
+    <header>
+        <button class="btn" id="btnOpen">Aç</button>
+        <div class="title" id="fileNameDisplay">İsimsiz.txt</div>
+        <button class="btn" id="btnSave" style="font-weight: 600;">Kaydet</button>
+    </header>
 
-        &lt;button class=&quot;btn&quot; id=&quot;btnOpen&quot;&gt;Aç&lt;/button&gt;
+    <div class="toolbar">
+        <button class="btn" id="btnSaveAs">Farklı Kaydet</button>
+        <div>
+            <button class="btn" id="btnUndo" style="margin-right: 15px;">Geri Al</button>
+            <button class="btn" id="btnRedo">İleri Al</button>
+        </div>
+    </div>
 
-        &lt;div class=&quot;title&quot; id=&quot;fileNameDisplay&quot;&gt;İsimsiz.txt&lt;/div&gt;
+    <textarea id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="none"></textarea>
+    <input type="file" id="fileInput" accept=".txt,.html,.js,.css,.json,.md,.csv">
 
-        &lt;button class=&quot;btn&quot; id=&quot;btnSave&quot; style=&quot;font-weight: 600;&quot;&gt;Kaydet&lt;/button&gt;
+    <div id="iosMenu" class="ios-context-menu">
+        <button id="menuCut">Kes</button>
+        <div class="divider"></div>
+        <button id="menuCopy">Kopyala</button>
+        <div class="divider"></div>
+        <button id="menuPaste">Yapıştır</button>
+        <div class="divider"></div>
+        <button id="menuDelete">Sil</button>
+        <div class="divider"></div>
+        <button id="menuSelectAll">Tümünü Seç</button>
+    </div>
 
-    &lt;/header&gt;
-
-
-
-    &lt;div class=&quot;toolbar&quot;&gt;
-
-        &lt;button class=&quot;btn&quot; id=&quot;btnSaveAs&quot;&gt;Farklı Kaydet&lt;/button&gt;
-
-        &lt;div&gt;
-
-            &lt;button class=&quot;btn&quot; id=&quot;btnUndo&quot; style=&quot;margin-right: 15px;&quot;&gt;Geri Al&lt;/button&gt;
-
-            &lt;button class=&quot;btn&quot; id=&quot;btnRedo&quot;&gt;İleri Al&lt;/button&gt;
-
-        &lt;/div&gt;
-
-    &lt;/div&gt;
-
-
-
-    &lt;div class=&quot;toolbar&quot;&gt;
-
-        &lt;button class=&quot;btn&quot; id=&quot;btnSelectAll&quot;&gt;Tümünü Seç&lt;/button&gt;
-
-        &lt;button class=&quot;btn&quot; id=&quot;btnCut&quot;&gt;Kes&lt;/button&gt;
-
-        &lt;button class=&quot;btn&quot; id=&quot;btnCopy&quot;&gt;Kopyala&lt;/button&gt;
-
-        &lt;button class=&quot;btn&quot; id=&quot;btnDelete&quot;&gt;Sil&lt;/button&gt;
-
-    &lt;/div&gt;
-
-
-
-    &lt;textarea id=&quot;editor&quot; spellcheck=&quot;false&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; autocapitalize=&quot;none&quot;&gt;&lt;/textarea&gt;
-
-    &lt;input type=&quot;file&quot; id=&quot;fileInput&quot; accept=&quot;.txt,.html,.js,.css,.json,.md,.csv&quot;&gt;
-
-
-
-    &lt;script&gt;
-
+    <script>
         // DOM Elementleri
-
         const editor = document.getElementById('editor');
-
         const fileInput = document.getElementById('fileInput');
-
         const fileNameDisplay = document.getElementById('fileNameDisplay');
-
         const btnOpen = document.getElementById('btnOpen');
-
         const btnSave = document.getElementById('btnSave');
-
         const btnSaveAs = document.getElementById('btnSaveAs');
-
         const btnUndo = document.getElementById('btnUndo');
-
         const btnRedo = document.getElementById('btnRedo');
 
-        
-
-        // Yeni eklenen DOM Elementleri
-
-        const btnSelectAll = document.getElementById('btnSelectAll');
-
-        const btnCut = document.getElementById('btnCut');
-
-        const btnCopy = document.getElementById('btnCopy');
-
-        const btnDelete = document.getElementById('btnDelete');
-
-
+        // Menü Elementleri
+        const iosMenu = document.getElementById('iosMenu');
+        const menuCut = document.getElementById('menuCut');
+        const menuCopy = document.getElementById('menuCopy');
+        const menuPaste = document.getElementById('menuPaste');
+        const menuDelete = document.getElementById('menuDelete');
+        const menuSelectAll = document.getElementById('menuSelectAll');
 
         // Durum Değişkenleri
-
-        let currentFileName = &quot;İsimsiz.txt&quot;;
-
+        let currentFileName = "İsimsiz.txt";
         let historyStack = [''];
-
         let historyIndex = 0;
-
         let isProgrammaticChange = false;
 
-
-
-        // Geçmiş (İleri/Geri Alma) İşlemleri
-
-        editor.addEventListener('input', () =&gt; {
-
+        // Geçmiş İşlemleri
+        editor.addEventListener('input', () => {
             if (isProgrammaticChange) {
-
                 isProgrammaticChange = false;
-
                 return;
-
             }
-
-            if (historyIndex &lt; historyStack.length - 1) {
-
+            if (historyIndex < historyStack.length - 1) {
                 historyStack = historyStack.slice(0, historyIndex + 1);
-
             }
-
             historyStack.push(editor.value);
-
             historyIndex++;
-
         });
 
+        function updateEditorValue(newValue) {
+            isProgrammaticChange = true;
+            editor.value = newValue;
+            editor.dispatchEvent(new Event('input')); 
+        }
 
-
-        btnUndo.addEventListener('click', () =&gt; {
-
-            if (historyIndex &gt; 0) {
-
+        btnUndo.addEventListener('click', () => {
+            if (historyIndex > 0) {
                 historyIndex--;
-
                 isProgrammaticChange = true;
-
                 editor.value = historyStack[historyIndex];
-
             }
-
         });
 
-
-
-        btnRedo.addEventListener('click', () =&gt; {
-
-            if (historyIndex &lt; historyStack.length - 1) {
-
+        btnRedo.addEventListener('click', () => {
+            if (historyIndex < historyStack.length - 1) {
                 historyIndex++;
-
                 isProgrammaticChange = true;
-
                 editor.value = historyStack[historyIndex];
-
             }
-
         });
 
+        // Dosya İşlemleri
+        btnOpen.addEventListener('click', () => fileInput.click());
 
-
-        // Dosya Açma İşlemi
-
-        btnOpen.addEventListener('click', () =&gt; {
-
-            fileInput.click();
-
-        });
-
-
-
-        fileInput.addEventListener('change', (event) =&gt; {
-
+        fileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
-
             if (!file) return;
 
-
-
             currentFileName = file.name;
-
             fileNameDisplay.textContent = currentFileName;
 
-
-
             const reader = new FileReader();
-
-            reader.onload = (e) =&gt; {
-
+            reader.onload = (e) => {
                 const content = e.target.result;
-
-                isProgrammaticChange = true;
-
-                editor.value = content;
-
-                
-
+                updateEditorValue(content);
                 historyStack = [content];
-
                 historyIndex = 0;
-
             };
-
             reader.readAsText(file);
-
             fileInput.value = '';
-
         });
-
-
-
-        // İndirme (Kaydetme) Fonksiyonu
 
         function downloadFile(filename, content) {
-
             const blob = new Blob([content], { type: 'text/plain' });
-
             const url = URL.createObjectURL(blob);
-
             const a = document.createElement('a');
-
             a.href = url;
-
             a.download = filename;
-
             document.body.appendChild(a);
-
             a.click();
-
-            setTimeout(() =&gt; {
-
+            setTimeout(() => {
                 document.body.removeChild(a);
-
                 URL.revokeObjectURL(url);
-
             }, 0);
-
         }
 
+        btnSave.addEventListener('click', () => downloadFile(currentFileName, editor.value));
 
-
-        // Kaydet İşlemi
-
-        btnSave.addEventListener('click', () =&gt; {
-
-            downloadFile(currentFileName, editor.value);
-
-        });
-
-
-
-        // Farklı Kaydet İşlemi
-
-        btnSaveAs.addEventListener('click', () =&gt; {
-
-            const newFileName = prompt(&quot;Dosya adını girin (uzantısıyla birlikte, örn: index.html):&quot;, currentFileName);
-
-            if (newFileName &amp;&amp; newFileName.trim() !== &quot;&quot;) {
-
+        btnSaveAs.addEventListener('click', () => {
+            const newFileName = prompt("Dosya adını girin (uzantısıyla birlikte, örn: index.html):", currentFileName);
+            if (newFileName && newFileName.trim() !== "") {
                 currentFileName = newFileName.trim();
-
                 fileNameDisplay.textContent = currentFileName;
-
                 downloadFile(currentFileName, editor.value);
-
             }
-
         });
 
+        // --- İOS STİLİ MENÜ İŞLEMLERİ ---
 
+        // Sağ Tık veya Uzun Basma Algılama
+        editor.addEventListener('contextmenu', (e) => {
+            e.preventDefault(); // Varsayılan menüyü engelle
+            
+            // Menüyü dokunulan yere konumlandır
+            let x = e.pageX;
+            let y = e.pageY - 50; // Parmağın biraz üstünde çıksın
+            
+            // Menü ekrandan taşmasın diye kontrol
+            if (x + 300 > window.innerWidth) x = window.innerWidth - 300;
+            if (y < 10) y = e.pageY + 20; // Üstten taşarsa alta al
 
-        // Yeni Eklenen İşlevler: Tümünü Seç, Kes, Kopyala, Sil
+            iosMenu.style.left = `${x}px`;
+            iosMenu.style.top = `${y}px`;
+            iosMenu.classList.add('active');
+        });
 
-        btnSelectAll.addEventListener('click', () =&gt; {
+        // Menü dışına tıklanınca menüyü kapat
+        document.addEventListener('click', (e) => {
+            if (!iosMenu.contains(e.target) && e.target !== editor) {
+                iosMenu.classList.remove('active');
+            }
+        });
+        editor.addEventListener('click', () => iosMenu.classList.remove('active'));
+        editor.addEventListener('scroll', () => iosMenu.classList.remove('active'));
 
+        // Menü Buton Fonksiyonları
+        menuSelectAll.addEventListener('click', () => {
             editor.focus();
-
             editor.select();
-
+            iosMenu.classList.remove('active');
         });
 
-
-
-        btnCopy.addEventListener('click', () =&gt; {
-
-            const start = editor.selectionStart;
-
-            const end = editor.selectionEnd;
-
-            const selectedText = editor.value.substring(start, end);
-
-            if (selectedText) {
-
-                navigator.clipboard.writeText(selectedText);
-
-                editor.focus();
-
-            }
-
+        menuCopy.addEventListener('click', () => {
+            const selectedText = editor.value.substring(editor.selectionStart, editor.selectionEnd);
+            if (selectedText) navigator.clipboard.writeText(selectedText);
+            iosMenu.classList.remove('active');
+            editor.focus();
         });
 
-
-
-        btnCut.addEventListener('click', () =&gt; {
-
+        menuCut.addEventListener('click', () => {
             const start = editor.selectionStart;
-
             const end = editor.selectionEnd;
-
             const selectedText = editor.value.substring(start, end);
-
             if (selectedText) {
-
-                navigator.clipboard.writeText(selectedText).then(() =&gt; {
-
+                navigator.clipboard.writeText(selectedText).then(() => {
                     editor.setRangeText('', start, end, 'end');
-
-                    editor.dispatchEvent(new Event('input')); // Geri alma geçmişini tetikler
-
-                    editor.focus();
-
+                    updateEditorValue(editor.value);
                 });
-
             }
-
+            iosMenu.classList.remove('active');
+            editor.focus();
         });
 
+        menuPaste.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                const start = editor.selectionStart;
+                const end = editor.selectionEnd;
+                editor.setRangeText(text, start, end, 'end');
+                updateEditorValue(editor.value);
+            } catch (err) {
+                alert("Panoya erişim reddedildi. Lütfen tarayıcı izinlerini kontrol edin.");
+            }
+            iosMenu.classList.remove('active');
+            editor.focus();
+        });
 
-
-        btnDelete.addEventListener('click', () =&gt; {
-
+        menuDelete.addEventListener('click', () => {
             const start = editor.selectionStart;
-
             const end = editor.selectionEnd;
-
             if (start !== end) {
-
                 editor.setRangeText('', start, end, 'end');
-
-                editor.dispatchEvent(new Event('input')); // Geri alma geçmişini tetikler
-
-                editor.focus();
-
+                updateEditorValue(editor.value);
             }
-
+            iosMenu.classList.remove('active');
+            editor.focus();
         });
-
-
 
         // Service Worker Kaydı (PWA için)
-
         if ('serviceWorker' in navigator) {
-
-            window.addEventListener('load', () =&gt; {
-
+            window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
-
-                    .then(registration =&gt; console.log('SW kayıtlı:', registration.scope))
-
-                    .catch(error =&gt; console.log('SW kayıt hatası:', error));
-
+                    .then(registration => console.log('SW kayıtlı:', registration.scope))
+                    .catch(error => console.log('SW kayıt hatası:', error));
             });
-
         }
-
-    &lt;/script&gt;
-
-&lt;/body&gt;
-
-&lt;/html&gt;
-</pre>
+    </script>
 </body>
 </html>
