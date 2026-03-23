@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alptekin PDF Maker - Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 400px; text-align: center; }
+        h2 { color: #333; margin-bottom: 1.5rem; }
+        .input-group { margin-bottom: 1rem; text-align: left; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555; }
+        select, input[type="file"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; transition: background 0.3s; margin-top: 1rem; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #status { margin-top: 1rem; font-size: 14px; color: #666; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>PDF Oluşturucu</h2>
+    
+    <div class="input-group">
+        <label>Sayfa Yönü:</label>
+        <select id="orientation">
+            <option value="p">Dikey (Portrait)</option>
+            <option value="l">Yatay (Landscape)</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label>Resimleri Seç (PNG, JPG, HEIC):</label>
+        <input type="file" id="imageInput" multiple accept="image/*">
+    </div>
+
+    <button id="generateBtn">PDF Olarak Kaydet</button>
+    <div id="status"></div>
+</div>
+
+<script>
+    const { jsPDF } = window.jspdf;
+
+    document.getElementById('generateBtn').addEventListener('click', async () => {
+        const input = document.getElementById('imageInput');
+        const orientation = document.getElementById('orientation').value;
+        const status = document.getElementById('status');
+        const btn = document.getElementById('generateBtn');
+
+        if (input.files.length === 0) {
+            alert("Lütfen önce resim seçin!");
+            return;
+        }
+
+        btn.disabled = true;
+        status.innerText = "İşleniyor... (HEIC dosyaları biraz zaman alabilir)";
+
+        const pdf = new jsPDF({
+            orientation: orientation,
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+
+        for (let i = 0; i < input.files.length; i++) {
+            let file = input.files[i];
+            status.innerText = `İşleniyor: ${i + 1} / ${input.files.length}`;
+
+            try {
+                // HEIC kontrolü ve dönüşümü
+                if (file.name.toLowerCase().endsWith('.heic')) {
+                    const blob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.8 });
+                    file = new File([blob], file.name.replace(/\.heic/i, ".jpg"), { type: "image/jpeg" });
+                }
+
+                const imageData = await readFileAsDataURL(file);
+                const imgProps = await getImageProps(imageData);
+                
+                if (i > 0) pdf.addPage();
+
+                let imgWidth = pageWidth;
+                let imgHeight = (imgProps.height * pageWidth) / imgProps.width;
+
+                // Eğer resim sayfadan uzunsa boyutu ayarla
+                if (imgHeight > pageHeight) {
+                    imgHeight = pageHeight;
+                    imgWidth = (imgProps.width * pageHeight) / imgProps.height;
+                }
+
+                const xOffset = (pageWidth - imgWidth) / 2;
+                const yOffset = (pageHeight - imgHeight) / 2;
+
+                pdf.addImage(imageData, 'JPEG', xOffset, yOffset, imgWidth, imgHeight);
+            } catch (error) {
+                console.error("Dosya işlenemedi:", file.name, error);
+            }
+        }
+
+        pdf.save("Alptekin_Belge.pdf");
+        status.innerText = "Tamamlandı!";
+        btn.disabled = false;
+    });
+
+    function readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function getImageProps(dataUrl) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve({ width: img.width, height: img.height });
+            img.src = dataUrl;
+        });
+    }
+</script>
+
+</body>
+</html>
