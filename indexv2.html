@@ -19,7 +19,6 @@
             --ios-tab-bg: #e5e5ea;
             --ios-tab-active: #ffffff;
             --ios-line-num: #8e8e93;
-            --editor-font-size: 16px; /* Dinamik Yazı Boyutu Değişkeni */
         }
 
         /* Karanlık Tema */
@@ -162,7 +161,7 @@
             width: 40px;
             padding: 15px 5px;
             font-family: monospace;
-            font-size: var(--editor-font-size); /* Dinamik */
+            font-size: 16px;
             line-height: 1.5;
             color: var(--ios-line-num);
             text-align: right;
@@ -177,7 +176,7 @@
             width: 100%;
             border: none;
             padding: 15px;
-            font-size: var(--editor-font-size); /* Dinamik */
+            font-size: 16px;
             line-height: 1.5;
             font-family: monospace;
             background-color: transparent;
@@ -187,11 +186,11 @@
             box-sizing: border-box;
             -webkit-appearance: none;
             overflow-y: auto;
-            white-space: pre;
+            white-space: pre; /* Uzun satırları alt satıra atmaz, yana kaydırır (satır no için gerekli) */
         }
 
-        /* Ortak Popup Stilleri (Arama ve Yazı Boyutu için) */
-        .popup-window {
+        /* Arama Popup */
+        .search-popup {
             position: absolute;
             top: max(60px, calc(env(safe-area-inset-top) + 50px));
             left: 50%;
@@ -206,31 +205,11 @@
             -webkit-backdrop-filter: blur(10px);
             z-index: 200;
             border: 1px solid var(--ios-border);
-            align-items: center;
         }
-        .popup-window.active { display: flex; }
 
-        /* Arama Popup */
-        #searchPopup input { padding: 8px; border-radius: 6px; border: 1px solid var(--ios-border); font-size: 16px; width: 150px; }
-        #searchPopup button { background: transparent; color: var(--ios-blue); border: none; font-size: 16px; cursor: pointer; }
-
-        /* Yazı Boyutu Popup */
-        #fontSizePopup button {
-            background: var(--ios-tab-bg);
-            color: var(--ios-text);
-            border: 1px solid var(--ios-border);
-            border-radius: 6px;
-            font-size: 20px;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #fontSizePopup button:active { opacity: 0.7; }
-        #fontSizePopup .close-btn { background: transparent; color: red; border: none; font-size: 16px; width: auto; height: auto; padding: 0 10px;}
-        .font-size-value { font-size: 16px; font-weight: bold; width: 45px; text-align: center; color: var(--ios-text); }
+        .search-popup.active { display: flex; align-items: center; }
+        .search-popup input { padding: 8px; border-radius: 6px; border: 1px solid var(--ios-border); font-size: 16px; width: 150px; }
+        .search-popup button { background: transparent; color: var(--ios-blue); border: none; font-size: 16px; cursor: pointer; }
 
         /* iOS Stili Basılı Tutma Menüsü */
         .ios-context-menu {
@@ -268,7 +247,7 @@
             <button id="menuSaveAs">Farklı Kaydet</button>
             <button id="menuUndo">Geri Al</button>
             <button id="menuRedo">İleri Al</button>
-            <button id="menuFontSize">Yazı Boyutu</button> <button id="menuTheme">Tema Değiştir</button>
+            <button id="menuTheme">Tema Değiştir</button>
         </div>
     </header>
 
@@ -282,17 +261,10 @@
         <textarea id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="none" wrap="off"></textarea>
     </div>
 
-    <div class="popup-window" id="searchPopup">
+    <div class="search-popup" id="searchPopup">
         <input type="text" id="searchInput" placeholder="Kelime ara...">
         <button id="btnSearchNext">Bul</button>
         <button id="btnSearchClose" style="color: red;">Kapat</button>
-    </div>
-
-    <div class="popup-window" id="fontSizePopup">
-        <button id="btnFontDec">-</button>
-        <span class="font-size-value" id="fontSizeDisplay">16px</span>
-        <button id="btnFontInc">+</button>
-        <button class="close-btn" id="btnFontClose">Kapat</button>
     </div>
 
     <input type="file" id="fileInput" accept=".txt,.html,.js,.css,.json,.md,.csv">
@@ -325,46 +297,7 @@
         const searchPopup = document.getElementById('searchPopup');
         const searchInput = document.getElementById('searchInput');
 
-        const fontSizePopup = document.getElementById('fontSizePopup');
-        const fontSizeDisplay = document.getElementById('fontSizeDisplay');
-
         const iosMenu = document.getElementById('iosMenu');
-
-        // --- YAZI BOYUTU (FONT SIZE) İŞLEMLERİ ---
-        let currentFontSize = parseInt(localStorage.getItem('alpEditorFontSize')) || 16;
-
-        function applyFontSize(size) {
-            document.documentElement.style.setProperty('--editor-font-size', size + 'px');
-            fontSizeDisplay.textContent = size + 'px';
-            localStorage.setItem('alpEditorFontSize', size);
-        }
-
-        // Başlangıçta kayıtlı boyutu uygula
-        applyFontSize(currentFontSize);
-
-        document.getElementById('menuFontSize').addEventListener('click', () => {
-            fontSizePopup.classList.add('active');
-            searchPopup.classList.remove('active');
-            mainMenu.classList.remove('active');
-        });
-
-        document.getElementById('btnFontClose').addEventListener('click', () => {
-            fontSizePopup.classList.remove('active');
-        });
-
-        document.getElementById('btnFontInc').addEventListener('click', () => {
-            if (currentFontSize < 40) { // Maksimum boyut
-                currentFontSize += 1;
-                applyFontSize(currentFontSize);
-            }
-        });
-
-        document.getElementById('btnFontDec').addEventListener('click', () => {
-            if (currentFontSize > 8) { // Minimum boyut
-                currentFontSize -= 1;
-                applyFontSize(currentFontSize);
-            }
-        });
 
         // --- SEKME YÖNETİMİ ---
         let tabs = [];
@@ -398,6 +331,7 @@
         }
 
         function switchTab(id) {
+            // Mevcut sekmeyi kaydet
             if (activeTabId !== null) {
                 const currentTab = tabs.find(t => t.id === activeTabId);
                 if(currentTab) currentTab.content = editor.value;
@@ -415,7 +349,7 @@
         }
 
         function closeTab(id) {
-            if (tabs.length === 1) return;
+            if (tabs.length === 1) return; // Son sekme kapanmasın
             tabs = tabs.filter(t => t.id !== id);
             if (activeTabId === id) switchTab(tabs[tabs.length - 1].id);
             else renderTabs();
@@ -431,6 +365,7 @@
         
         editor.addEventListener('input', () => {
             updateLineNumbers();
+            // Geçmiş kaydı
             const active = tabs.find(t => t.id === activeTabId);
             if (!isProgrammaticChange) {
                 if (active.historyIndex < active.history.length - 1) {
@@ -459,7 +394,7 @@
             }
         });
 
-        // Dosya Aç İşlemi
+        // Dosya Aç İşlemi (HATA DÜZELTİLDİ)
         document.getElementById('menuOpen').addEventListener('click', () => {
             fileInput.click();
             mainMenu.classList.remove('active');
@@ -474,11 +409,13 @@
                 const content = e.target.result;
                 const activeTab = tabs.find(t => t.id === activeTabId);
                 
+                // Doğrudan sekme verilerini güncelle (üzerine yazmayı önler)
                 activeTab.name = file.name;
                 activeTab.content = content;
                 activeTab.history = [content];
                 activeTab.historyIndex = 0;
 
+                // Editör içeriğini anında değiştir
                 isProgrammaticChange = true;
                 editor.value = content;
                 fileNameDisplay.textContent = file.name;
@@ -487,7 +424,7 @@
                 updateLineNumbers();
             };
             reader.readAsText(file);
-            fileInput.value = '';
+            fileInput.value = ''; // Aynı dosyayı tekrar seçebilmek için sıfırla
         });
 
         // Kaydetme İşlevleri
@@ -560,7 +497,6 @@
 
         function showSearch() {
             searchPopup.classList.add('active');
-            fontSizePopup.classList.remove('active');
             searchInput.focus();
             iosMenu.classList.remove('active');
         }
@@ -579,10 +515,11 @@
             
             if (foundIndex !== -1) {
                 editor.focus();
+                // Kelimeyi seçerek vurgula (iOS klavyesiyle en uyumlu yöntem)
                 editor.setSelectionRange(foundIndex, foundIndex + word.length);
                 lastSearchIndex = foundIndex + word.length;
             } else {
-                lastSearchIndex = 0; 
+                lastSearchIndex = 0; // Başa dön
                 alert("Metin sonuna ulaşıldı veya kelime bulunamadı.");
             }
         });
@@ -639,7 +576,7 @@
         // İlk sekmeyi başlat
         createTab();
 
-        // PWA Service Worker
+        // PWA Service Worker (Kaldırılmadı)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
