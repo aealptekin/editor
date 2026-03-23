@@ -1,0 +1,36 @@
+{
+
+
+
+  "name": "iOS Stil Editör",
+
+  "short_name": "AlpEditör",
+
+  "description": "Basit HTML, JS, TXT dosya editörü",
+
+  "start_url": "index.html",
+
+  "display": "standalone",
+
+  "background_color": "#f2f2f7",
+
+  "theme_color": "#f8f8f8",
+
+  "icons": [
+
+    {
+
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23007AFF'/><text x='50%' y='50%' font-size='50' fill='white' text-anchor='middle' dominant-baseline='central'>E</text></svg>",
+
+      "sizes": "192x192",
+
+      "type": "image/svg+xml",
+
+      "purpose": "any maskable"
+
+    }
+
+  ]
+
+}
+

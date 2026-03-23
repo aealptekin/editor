@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 7.6.4.1 (Linux)"/>
+	<meta name="created" content="00:00:00"/>
+	<meta name="changed" content="00:00:00"/>
+	<style type="text/css">
+		@page { size: 8.27in 11.69in; margin: 0.79in }
+		p { line-height: 115%; margin-bottom: 0.1in; background: transparent }
+		pre { background: transparent }
+		pre.western { font-family: "Liberation Mono", monospace; font-size: 10pt }
+		pre.cjk { font-family: "NSimSun", monospace; font-size: 10pt }
+		pre.ctl { font-family: "Liberation Mono", monospace; font-size: 10pt }
+	</style>
+</head>
+<body lang="en-US" link="#000080" vlink="#800000" dir="ltr"><pre class="western">&lt;!DOCTYPE html&gt;
+
+&lt;html lang=&quot;tr&quot;&gt;
+
+&lt;head&gt;
+
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover&quot;&gt;
+
+    &lt;meta name=&quot;apple-mobile-web-app-capable&quot; content=&quot;yes&quot;&gt;
+
+    &lt;meta name=&quot;apple-mobile-web-app-status-bar-style&quot; content=&quot;default&quot;&gt;
+
+    &lt;title&gt;iOS Editör&lt;/title&gt;
+
+    &lt;link rel=&quot;manifest&quot; href=&quot;manifest.json&quot;&gt;
+
+    &lt;style&gt;
+
+        /* iPhone (iOS) Stili CSS */
+
+        :root {
+
+            --ios-bg: #f2f2f7;
+
+            --ios-header: #f8f8f8;
+
+            --ios-blue: #007AFF;
+
+            --ios-border: #c6c6c8;
+
+            --ios-text: #000000;
+
+        }
+
+
+
+        body {
+
+            margin: 0;
+
+            padding: 0;
+
+            font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif;
+
+            background-color: var(--ios-bg);
+
+            display: flex;
+
+            flex-direction: column;
+
+            height: 100vh;
+
+            overflow: hidden;
+
+        }
+
+
+
+        header {
+
+            background-color: var(--ios-header);
+
+            border-bottom: 1px solid var(--ios-border);
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding: 10px 15px;
+
+            padding-top: max(10px, env(safe-area-inset-top));
+
+        }
+
+
+
+        .toolbar {
+
+            background-color: var(--ios-header);
+
+            border-bottom: 1px solid var(--ios-border);
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding: 8px 15px;
+
+        }
+
+
+
+        .btn {
+
+            color: var(--ios-blue);
+
+            background: transparent;
+
+            border: none;
+
+            font-size: 17px;
+
+            cursor: pointer;
+
+            padding: 0;
+
+            margin: 0;
+
+        }
+
+
+
+        .btn:active {
+
+            opacity: 0.5;
+
+        }
+
+
+
+        .title {
+
+            font-size: 17px;
+
+            font-weight: 600;
+
+            color: var(--ios-text);
+
+            flex: 1;
+
+            text-align: center;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+
+            padding: 0 10px;
+
+        }
+
+
+
+        textarea {
+
+            flex: 1;
+
+            width: 100%;
+
+            border: none;
+
+            padding: 15px;
+
+            font-size: 16px;
+
+            font-family: monospace;
+
+            background-color: #ffffff;
+
+            color: var(--ios-text);
+
+            resize: none;
+
+            outline: none;
+
+            box-sizing: border-box;
+
+            -webkit-appearance: none;
+
+        }
+
+
+
+        input[type=&quot;file&quot;] {
+
+            display: none;
+
+        }
+
+    &lt;/style&gt;
+
+&lt;/head&gt;
+
+&lt;body&gt;
+
+
+
+    &lt;header&gt;
+
+        &lt;button class=&quot;btn&quot; id=&quot;btnOpen&quot;&gt;Aç&lt;/button&gt;
+
+        &lt;div class=&quot;title&quot; id=&quot;fileNameDisplay&quot;&gt;İsimsiz.txt&lt;/div&gt;
+
+        &lt;button class=&quot;btn&quot; id=&quot;btnSave&quot; style=&quot;font-weight: 600;&quot;&gt;Kaydet&lt;/button&gt;
+
+    &lt;/header&gt;
+
+
+
+    &lt;div class=&quot;toolbar&quot;&gt;
+
+        &lt;button class=&quot;btn&quot; id=&quot;btnSaveAs&quot;&gt;Farklı Kaydet&lt;/button&gt;
+
+        &lt;div&gt;
+
+            &lt;button class=&quot;btn&quot; id=&quot;btnUndo&quot; style=&quot;margin-right: 15px;&quot;&gt;Geri Al&lt;/button&gt;
+
+            &lt;button class=&quot;btn&quot; id=&quot;btnRedo&quot;&gt;İleri Al&lt;/button&gt;
+
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+
+
+
+    &lt;div class=&quot;toolbar&quot;&gt;
+
+        &lt;button class=&quot;btn&quot; id=&quot;btnSelectAll&quot;&gt;Tümünü Seç&lt;/button&gt;
+
+        &lt;button class=&quot;btn&quot; id=&quot;btnCut&quot;&gt;Kes&lt;/button&gt;
+
+        &lt;button class=&quot;btn&quot; id=&quot;btnCopy&quot;&gt;Kopyala&lt;/button&gt;
+
+        &lt;button class=&quot;btn&quot; id=&quot;btnDelete&quot;&gt;Sil&lt;/button&gt;
+
+    &lt;/div&gt;
+
+
+
+    &lt;textarea id=&quot;editor&quot; spellcheck=&quot;false&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; autocapitalize=&quot;none&quot;&gt;&lt;/textarea&gt;
+
+    &lt;input type=&quot;file&quot; id=&quot;fileInput&quot; accept=&quot;.txt,.html,.js,.css,.json,.md,.csv&quot;&gt;
+
+
+
+    &lt;script&gt;
+
+        // DOM Elementleri
+
+        const editor = document.getElementById('editor');
+
+        const fileInput = document.getElementById('fileInput');
+
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+        const btnOpen = document.getElementById('btnOpen');
+
+        const btnSave = document.getElementById('btnSave');
+
+        const btnSaveAs = document.getElementById('btnSaveAs');
+
+        const btnUndo = document.getElementById('btnUndo');
+
+        const btnRedo = document.getElementById('btnRedo');
+
+        
+
+        // Yeni eklenen DOM Elementleri
+
+        const btnSelectAll = document.getElementById('btnSelectAll');
+
+        const btnCut = document.getElementById('btnCut');
+
+        const btnCopy = document.getElementById('btnCopy');
+
+        const btnDelete = document.getElementById('btnDelete');
+
+
+
+        // Durum Değişkenleri
+
+        let currentFileName = &quot;İsimsiz.txt&quot;;
+
+        let historyStack = [''];
+
+        let historyIndex = 0;
+
+        let isProgrammaticChange = false;
+
+
+
+        // Geçmiş (İleri/Geri Alma) İşlemleri
+
+        editor.addEventListener('input', () =&gt; {
+
+            if (isProgrammaticChange) {
+
+                isProgrammaticChange = false;
+
+                return;
+
+            }
+
+            if (historyIndex &lt; historyStack.length - 1) {
+
+                historyStack = historyStack.slice(0, historyIndex + 1);
+
+            }
+
+            historyStack.push(editor.value);
+
+            historyIndex++;
+
+        });
+
+
+
+        btnUndo.addEventListener('click', () =&gt; {
+
+            if (historyIndex &gt; 0) {
+
+                historyIndex--;
+
+                isProgrammaticChange = true;
+
+                editor.value = historyStack[historyIndex];
+
+            }
+
+        });
+
+
+
+        btnRedo.addEventListener('click', () =&gt; {
+
+            if (historyIndex &lt; historyStack.length - 1) {
+
+                historyIndex++;
+
+                isProgrammaticChange = true;
+
+                editor.value = historyStack[historyIndex];
+
+            }
+
+        });
+
+
+
+        // Dosya Açma İşlemi
+
+        btnOpen.addEventListener('click', () =&gt; {
+
+            fileInput.click();
+
+        });
+
+
+
+        fileInput.addEventListener('change', (event) =&gt; {
+
+            const file = event.target.files[0];
+
+            if (!file) return;
+
+
+
+            currentFileName = file.name;
+
+            fileNameDisplay.textContent = currentFileName;
+
+
+
+            const reader = new FileReader();
+
+            reader.onload = (e) =&gt; {
+
+                const content = e.target.result;
+
+                isProgrammaticChange = true;
+
+                editor.value = content;
+
+                
+
+                historyStack = [content];
+
+                historyIndex = 0;
+
+            };
+
+            reader.readAsText(file);
+
+            fileInput.value = '';
+
+        });
+
+
+
+        // İndirme (Kaydetme) Fonksiyonu
+
+        function downloadFile(filename, content) {
+
+            const blob = new Blob([content], { type: 'text/plain' });
+
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+
+            a.href = url;
+
+            a.download = filename;
+
+            document.body.appendChild(a);
+
+            a.click();
+
+            setTimeout(() =&gt; {
+
+                document.body.removeChild(a);
+
+                URL.revokeObjectURL(url);
+
+            }, 0);
+
+        }
+
+
+
+        // Kaydet İşlemi
+
+        btnSave.addEventListener('click', () =&gt; {
+
+            downloadFile(currentFileName, editor.value);
+
+        });
+
+
+
+        // Farklı Kaydet İşlemi
+
+        btnSaveAs.addEventListener('click', () =&gt; {
+
+            const newFileName = prompt(&quot;Dosya adını girin (uzantısıyla birlikte, örn: index.html):&quot;, currentFileName);
+
+            if (newFileName &amp;&amp; newFileName.trim() !== &quot;&quot;) {
+
+                currentFileName = newFileName.trim();
+
+                fileNameDisplay.textContent = currentFileName;
+
+                downloadFile(currentFileName, editor.value);
+
+            }
+
+        });
+
+
+
+        // Yeni Eklenen İşlevler: Tümünü Seç, Kes, Kopyala, Sil
+
+        btnSelectAll.addEventListener('click', () =&gt; {
+
+            editor.focus();
+
+            editor.select();
+
+        });
+
+
+
+        btnCopy.addEventListener('click', () =&gt; {
+
+            const start = editor.selectionStart;
+
+            const end = editor.selectionEnd;
+
+            const selectedText = editor.value.substring(start, end);
+
+            if (selectedText) {
+
+                navigator.clipboard.writeText(selectedText);
+
+                editor.focus();
+
+            }
+
+        });
+
+
+
+        btnCut.addEventListener('click', () =&gt; {
+
+            const start = editor.selectionStart;
+
+            const end = editor.selectionEnd;
+
+            const selectedText = editor.value.substring(start, end);
+
+            if (selectedText) {
+
+                navigator.clipboard.writeText(selectedText).then(() =&gt; {
+
+                    editor.setRangeText('', start, end, 'end');
+
+                    editor.dispatchEvent(new Event('input')); // Geri alma geçmişini tetikler
+
+                    editor.focus();
+
+                });
+
+            }
+
+        });
+
+
+
+        btnDelete.addEventListener('click', () =&gt; {
+
+            const start = editor.selectionStart;
+
+            const end = editor.selectionEnd;
+
+            if (start !== end) {
+
+                editor.setRangeText('', start, end, 'end');
+
+                editor.dispatchEvent(new Event('input')); // Geri alma geçmişini tetikler
+
+                editor.focus();
+
+            }
+
+        });
+
+
+
+        // Service Worker Kaydı (PWA için)
+
+        if ('serviceWorker' in navigator) {
+
+            window.addEventListener('load', () =&gt; {
+
+                navigator.serviceWorker.register('sw.js')
+
+                    .then(registration =&gt; console.log('SW kayıtlı:', registration.scope))
+
+                    .catch(error =&gt; console.log('SW kayıt hatası:', error));
+
+            });
+
+        }
+
+    &lt;/script&gt;
+
+&lt;/body&gt;
+
+&lt;/html&gt;
+</pre>
+</body>
+</html>
