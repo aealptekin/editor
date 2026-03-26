@@ -19,7 +19,7 @@
             --ios-tab-bg: #e5e5ea;
             --ios-tab-active: #ffffff;
             --ios-line-num: #8e8e93;
-            --editor-font-size: 16px; /* Dinamik Yazı Boyutu Değişkeni */
+            --editor-font-size: 16px; 
         }
 
         /* Karanlık Tema */
@@ -57,7 +57,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 15px;
-            padding-top: max(15px, env(safe-area-inset-top)); /* Çentik koruması */
+            padding-top: max(15px, env(safe-area-inset-top)); 
             position: relative;
             z-index: 100;
         }
@@ -98,9 +98,7 @@
             border: 1px solid var(--ios-border);
         }
 
-        .dropdown-menu.active {
-            display: flex;
-        }
+        .dropdown-menu.active { display: flex; }
 
         .dropdown-menu button {
             background: transparent;
@@ -122,9 +120,9 @@
             background-color: var(--ios-header);
             border-bottom: 1px solid var(--ios-border);
             overflow-x: auto;
-            scrollbar-width: none; /* Firefox */
+            scrollbar-width: none; 
         }
-        .tabs-container::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+        .tabs-container::-webkit-scrollbar { display: none; } 
 
         .tab {
             padding: 10px 15px;
@@ -162,7 +160,7 @@
             width: 40px;
             padding: 15px 5px;
             font-family: monospace;
-            font-size: var(--editor-font-size); /* Dinamik */
+            font-size: var(--editor-font-size); 
             line-height: 1.5;
             color: var(--ios-line-num);
             text-align: right;
@@ -177,7 +175,7 @@
             width: 100%;
             border: none;
             padding: 15px;
-            font-size: var(--editor-font-size); /* Dinamik */
+            font-size: var(--editor-font-size); 
             line-height: 1.5;
             font-family: monospace;
             background-color: transparent;
@@ -190,7 +188,7 @@
             white-space: pre;
         }
 
-        /* Ortak Popup Stilleri (Arama ve Yazı Boyutu için) */
+        /* Ortak Popup Stilleri */
         .popup-window {
             position: absolute;
             top: max(60px, calc(env(safe-area-inset-top) + 50px));
@@ -268,7 +266,8 @@
             <button id="menuSaveAs">Farklı Kaydet</button>
             <button id="menuUndo">Geri Al</button>
             <button id="menuRedo">İleri Al</button>
-            <button id="menuFontSize">Yazı Boyutu</button> <button id="menuTheme">Tema Değiştir</button>
+            <button id="menuFontSize">Yazı Boyutu</button> 
+            <button id="menuTheme">Tema Değiştir</button>
         </div>
     </header>
 
@@ -330,7 +329,7 @@
 
         const iosMenu = document.getElementById('iosMenu');
 
-        // --- YAZI BOYUTU (FONT SIZE) İŞLEMLERİ ---
+        // --- YAZI BOYUTU İŞLEMLERİ ---
         let currentFontSize = parseInt(localStorage.getItem('alpEditorFontSize')) || 16;
 
         function applyFontSize(size) {
@@ -338,8 +337,6 @@
             fontSizeDisplay.textContent = size + 'px';
             localStorage.setItem('alpEditorFontSize', size);
         }
-
-        // Başlangıçta kayıtlı boyutu uygula
         applyFontSize(currentFontSize);
 
         document.getElementById('menuFontSize').addEventListener('click', () => {
@@ -353,14 +350,14 @@
         });
 
         document.getElementById('btnFontInc').addEventListener('click', () => {
-            if (currentFontSize < 40) { // Maksimum boyut
+            if (currentFontSize < 40) {
                 currentFontSize += 1;
                 applyFontSize(currentFontSize);
             }
         });
 
         document.getElementById('btnFontDec').addEventListener('click', () => {
-            if (currentFontSize > 8) { // Minimum boyut
+            if (currentFontSize > 8) {
                 currentFontSize -= 1;
                 applyFontSize(currentFontSize);
             }
@@ -402,7 +399,6 @@
                 const currentTab = tabs.find(t => t.id === activeTabId);
                 if(currentTab) currentTab.content = editor.value;
             }
-
             activeTabId = id;
             const newTab = tabs.find(t => t.id === id);
             
@@ -490,15 +486,43 @@
             fileInput.value = '';
         });
 
-        // Kaydetme İşlevleri
+        // --- DOSYA İNDİRME VE UZANTI DÜZELTME (YENİ) ---
+        function getMimeType(filename) {
+            // Dosya adından uzantıyı alır (örn: "abc.html" -> "html")
+            const ext = filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2).toLowerCase();
+            
+            // Uzantılara göre doğru tarayıcı tiplerini belirliyoruz
+            const mimeTypes = {
+                'html': 'text/html',
+                'htm': 'text/html',
+                'js': 'text/javascript',
+                'css': 'text/css',
+                'json': 'application/json',
+                'md': 'text/markdown',
+                'csv': 'text/csv',
+                'xml': 'text/xml',
+                'txt': 'text/plain'
+            };
+            
+            // Eğer bilinen bir uzantıysa onu kullan, değilse "application/octet-stream" kullanarak .txt eklenmesini engelle
+            return mimeTypes[ext] || 'application/octet-stream';
+        }
+
         function downloadFile(filename, content) {
-            const blob = new Blob([content], { type: 'text/plain' });
+            const mimeType = getMimeType(filename);
+            const blob = new Blob([content], { type: mimeType });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             a.download = filename;
+            
+            document.body.appendChild(a);
             a.click();
-            URL.revokeObjectURL(url);
+            
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 0);
         }
 
         document.getElementById('menuSave').addEventListener('click', () => {
@@ -509,12 +533,12 @@
 
         document.getElementById('menuSaveAs').addEventListener('click', () => {
             const activeTab = tabs.find(t => t.id === activeTabId);
-            const newName = prompt("Dosya adı:", activeTab.name);
-            if (newName) {
-                activeTab.name = newName;
+            const newName = prompt("Dosya adı (örn: index.html):", activeTab.name);
+            if (newName && newName.trim() !== "") {
+                activeTab.name = newName.trim();
                 renderTabs();
-                fileNameDisplay.textContent = newName;
-                downloadFile(newName, editor.value);
+                fileNameDisplay.textContent = activeTab.name;
+                downloadFile(activeTab.name, editor.value);
             }
             mainMenu.classList.remove('active');
         });
