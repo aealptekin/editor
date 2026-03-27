@@ -1,204 +1,206 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>AlpEditör Final</title>
-<link rel="manifest" href="manifest.json">
-<style>
-:root {
-    --bg:#f2f2f7; --text:#000; --header:#f8f8f8; --blue:#007AFF; --tab:#e5e5ea; --tabActive:#fff; --fs:16px;
-}
-/* Sistem Teması Algılama (EKSİKTİ - EKLENDİ) */
-@media (prefers-color-scheme: dark) { :root { --bg:#000; --text:#fff; --header:#1c1c1e; --tab:#2c2c2e; --tabActive:#000; } }
-body.dark { --bg:#000; --text:#fff; --header:#1c1c1e; --tab:#2c2c2e; --tabActive:#000; }
-body.light { --bg:#f2f2f7; --text:#000; --header:#f8f8f8; --tab:#e5e5ea; --tabActive:#fff; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>AlpEditör Ultra Fix</title>
+    <style>
+        :root {
+            --ios-bg: #000000; --ios-header: #1c1c1e; --ios-blue: #0a84ff; --ios-border: #38383a;
+            --ios-text: #ffffff; --ios-menu-bg: rgba(44, 44, 46, 0.98); --ios-tab-bg: #2c2c2e;
+            --fs: 16px; --glass: blur(25px) saturate(180%);
+        }
+        body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background: var(--ios-bg); color: var(--ios-text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-body { margin:0; font-family:-apple-system, sans-serif; background:var(--bg); color:var(--text); display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+        /* HEADER DÜZELTME: Üç Nokta Menüsü Sağda Sabitlendi */
+        header { 
+            background: var(--ios-header); border-bottom: 1px solid var(--ios-border); 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 10px 15px; padding-top: max(10px, env(safe-area-inset-top)); 
+            z-index: 5000; position: relative;
+        }
+        .btn-icon { color: var(--ios-blue); background: none; border: none; font-size: 24px; cursor: pointer; padding: 5px; }
 
-header { display:flex; justify-content:space-between; padding:10px; background:var(--header); border-bottom:1px solid #ccc; z-index:1000; }
-.btn-icon { background:none; border:none; color:var(--blue); font-size:20px; cursor:pointer; font-weight:bold; }
+        /* ANA MENÜ DÜZELTME: Görseldeki gibi solda değil, butonun altında açılır */
+        .dropdown-menu { 
+            position: absolute; top: 100%; right: 10px; width: 220px;
+            background: var(--ios-menu-bg); border-radius: 14px; border: 1px solid var(--ios-border);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+            display: none; flex-direction: column; z-index: 6000; overflow: hidden;
+        }
+        .dropdown-menu.active { display: flex; }
+        .menu-btn { background: none; border: none; border-bottom: 0.5px solid var(--ios-border); color: var(--ios-blue); padding: 14px 20px; text-align: left; font-size: 16px; cursor: pointer; }
+        .menu-btn:last-child { border-bottom: none; }
 
-/* Swipe ve Kaydırma Destekli Sekmeler */
-.tabs { display:flex; background:var(--header); overflow-x:auto; scrollbar-width:none; touch-action: pan-x; border-bottom:1px solid #ccc; }
-.tabs::-webkit-scrollbar { display:none; }
-.tab { padding:10px 15px; background:var(--tab); border-right:1px solid #ccc; white-space:nowrap; display:flex; align-items:center; gap:8px; flex-shrink:0; }
-.tab.active { background:var(--tabActive); border-bottom:2px solid var(--blue); font-weight:bold; }
+        /* SAĞ TIK (CONTEXT) MENÜSÜ DÜZELTME: Ekran görüntüsündeki gibi yatay değil, dikey ve şık iOS stili */
+        .ios-menu { 
+            position: fixed; background: var(--ios-menu-bg); border-radius: 12px; 
+            border: 1px solid var(--ios-border); box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+            display: none; flex-direction: column; z-index: 7000; width: 180px;
+        }
+        .ios-menu.active { display: flex; }
+        .ios-menu button { background: none; border: none; border-bottom: 0.5px solid var(--ios-border); color: var(--ios-text); padding: 12px 20px; text-align: left; font-size: 15px; cursor: pointer; }
 
-/* Klavye Resize Problemi İçin Flex-Grow (EKSİKTİ - EKLENDİ) */
-.editorWrap { display:flex; flex:1; overflow:hidden; position:relative; min-height: 0; }
-.lines { width:40px; background:var(--header); padding:10px 5px; font-size:var(--fs); color:#888; text-align:right; font-family:monospace; user-select:none; }
-textarea { flex:1; font-size:var(--fs); border:none; outline:none; padding:10px; background:transparent; color:var(--text); font-family:monospace; resize:none; white-space:pre; line-height:1.5; }
+        /* EDİTÖR ALANI */
+        .tabs { display: flex; background: var(--ios-header); border-bottom: 1px solid var(--ios-border); overflow-x: auto; scrollbar-width: none; }
+        .tab { padding: 10px 15px; background: var(--ios-tab-bg); border-right: 1px solid var(--ios-border); white-space: nowrap; cursor: pointer; font-size: 14px; }
+        .tab.active { background: var(--ios-bg); font-weight: bold; border-bottom: 2px solid var(--ios-blue); }
 
-/* Menüler ve Popuplar */
-.menu, .ios-menu, .popup { position:absolute; background:var(--header); border:1px solid #ccc; border-radius:12px; display:none; flex-direction:column; box-shadow:0 10px 30px rgba(0,0,0,0.3); backdrop-filter:blur(20px); z-index:2000; }
-.active { display:flex !important; }
-.menu button, .ios-menu button { padding:12px 20px; text-align:left; border:none; border-bottom:0.5px solid #ccc; color:var(--blue); background:none; font-size:16px; }
+        .editor-container { display: flex; flex: 1; overflow: hidden; position: relative; }
+        .lines { width: 45px; background: var(--ios-header); padding: 15px 5px; text-align: right; color: #666; font-family: monospace; font-size: var(--fs); border-right: 1px solid var(--ios-border); user-select: none; }
+        textarea { flex: 1; border: none; outline: none; padding: 15px; background: transparent; color: var(--ios-text); font-family: monospace; font-size: var(--fs); line-height: 1.5; resize: none; overflow-y: auto; white-space: pre; }
 
-.ios-menu { flex-direction:row; width:auto; position:fixed; }
-.ios-menu button { padding:10px 15px; font-size:14px; color:var(--text); }
-
-.toolbar { display:flex; background:var(--header); border-top:1px solid #ccc; overflow-x:auto; padding:8px; gap:6px; }
-.toolbar button { background:var(--tab); color:var(--text); border-radius:8px; padding:10px; min-width:44px; border:none; }
-
-#searchBar { top:60px; left:50%; transform:translateX(-50%); width:90%; padding:10px; flex-direction:row; align-items:center; gap:5px; }
-#searchBar input { flex:1; padding:8px; border-radius:8px; border:1px solid #ccc; background:var(--bg); color:var(--text); }
-
-.toast { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:#fff; padding:10px 20px; border-radius:20px; display:none; z-index:5000; }
-</style>
+        /* TOOLBAR */
+        .toolbar { display: flex; background: var(--ios-header); border-top: 1px solid var(--ios-border); overflow-x: auto; padding: 8px; gap: 6px; }
+        .toolbar button { background: var(--ios-tab-bg); color: var(--ios-text); border: 1px solid var(--ios-border); border-radius: 8px; padding: 12px; min-width: 44px; font-family: monospace; }
+        
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 10px 20px; border-radius: 20px; display: none; z-index: 8000; font-size: 14px; }
+    </style>
 </head>
-<body>
+<body class="dark-theme">
 
 <header>
-    <span id="fileName" style="font-weight:bold">İsimsiz.html</span>
-    <div>
-        <button class="btn-icon" onclick="toggleSearch()">🔍</button>
-        <button class="btn-icon" id="menuBtn">•••</button>
+    <div id="fileNameDisplay" style="font-weight: bold;">İsimsiz.html</div>
+    <div style="display:flex; gap:10px;">
+        <button class="btn-icon" id="btnRun">▶️</button>
+        <button class="btn-icon" id="btnMenuToggle">•••</button>
     </div>
-    <div id="menu" class="menu" style="top:50px; right:10px;">
-        <button onclick="openFile()">📁 Aç</button>
-        <button onclick="saveFile(false)">💾 Kaydet</button>
-        <button onclick="saveFile(true)">📑 Farklı Kaydet</button>
-        <button onclick="undo()">↩️ Geri</button>
-        <button onclick="redo()">↪️ İleri</button>
-        <button onclick="toggleTheme()">🌓 Tema</button>
-        <button onclick="fontSize()">📏 Boyut</button>
+    
+    <div class="dropdown-menu" id="mainMenu">
+        <button class="menu-btn" onclick="document.getElementById('fileInput').click()">📁 Dosya Aç</button>
+        <button class="menu-btn" onclick="saveFile(false)">💾 Kaydet</button>
+        <button class="menu-btn" onclick="saveFile(true)">📑 Farklı Kaydet</button>
+        <button class="menu-btn" onclick="undo()">↩️ Geri Al</button>
+        <button class="menu-btn" onclick="redo()">↪️ İleri Al</button>
+        <button class="menu-btn" onclick="toggleTheme()">🌓 Tema Değiştir</button>
+        <button class="menu-btn" onclick="changeFS()">📏 Yazı Boyutu</button>
     </div>
 </header>
 
-<div class="tabs" id="tabsDiv"></div>
-
-<div class="editorWrap">
-    <div id="lines" class="lines">1</div>
-    <textarea id="editor" spellcheck="false" wrap="off"></textarea>
+<div class="tabs">
+    <div id="tabsDiv" style="display:flex;"></div>
+    <button onclick="addTab()" style="padding:10px 20px; color:var(--ios-blue); border:none; background:none; font-size:24px;">+</button>
 </div>
 
-<div id="searchBar" class="popup">
-    <input type="text" id="searchInput" placeholder="Ara...">
-    <button onclick="doSearch(false)">▲</button>
-    <button onclick="doSearch(true)">▼</button>
-    <button onclick="toggleSearch()" style="color:red">✕</button>
+<div class="editor-container">
+    <div id="lineNumbers" class="lines">1</div>
+    <textarea id="editor" spellcheck="false" autocomplete="off" wrap="off"></textarea>
 </div>
 
 <div class="toolbar">
-    <button onclick="ins('\t')">TAB</button><button onclick="ins('<')">&lt;</button><button onclick="ins('>')">&gt;</button>
-    <button onclick="ins('/')">/</button><button onclick="ins('{')">{</button><button onclick="ins('}')">}</button>
+    <button onclick="ins('\t')">TAB</button><button onclick="ins('<')">&lt;</button>
+    <button onclick="ins('>')">&gt;</button><button onclick="ins('/')">/</button>
+    <button onclick="ins('{')">{</button><button onclick="ins('}')">}</button>
     <button onclick="ins(';')">;</button><button onclick="ins('=')">=</button>
 </div>
 
-<div id="iosMenu" class="ios-menu">
-    <button onclick="handleAct('selectAll')">Seç</button>
+<div id="iosContextMenu" class="ios-menu">
+    <button onclick="handleAct('selectAll')">Tümünü Seç</button>
     <button onclick="handleAct('cut')">Kes</button>
-    <button onclick="handleAct('copy')">Kopya</button>
+    <button onclick="handleAct('copy')">Kopyala</button>
     <button onclick="handleAct('paste')">Yapıştır</button>
-    <button onclick="handleAct('del')" style="color:red">Sil</button>
+    <button onclick="handleAct('delete')" style="color:red">Sil</button>
 </div>
 
 <div id="toast" class="toast">Kopyalandı!</div>
-<input type="file" id="fileInput" hidden>
+<input type="file" id="fileInput" style="display:none;">
 
 <script>
-let tabs=[], active=null, id=0, isProg=false, lastIdx=0, curFS=16;
-const editor=document.getElementById("editor"), lines=document.getElementById("lines"), tabsDiv=document.getElementById("tabsDiv"), 
-      fileName=document.getElementById("fileName"), iosMenu=document.getElementById("iosMenu"), menu=document.getElementById("menu");
+    const editor = document.getElementById('editor'), ln = document.getElementById('lineNumbers'), mainMenu = document.getElementById('mainMenu'), ctxMenu = document.getElementById('iosContextMenu'), fileInput = document.getElementById('fileInput');
+    let tabs = [], activeTabId = null, tabCounter = 0, isProg = false, curFS = 16;
 
-// 1. CANLI ÖNİZLEME (EKLENDİ - Yazarken Değişir)
-editor.addEventListener('input', () => {
-    updateLines();
-    if (active && !isProg) {
-        let t = tabs.find(x => x.id === active);
-        t.content = editor.value;
-        if(t.i < t.his.length-1) t.his = t.his.slice(0, t.i+1);
-        t.his.push(editor.value); t.i++;
-        saveSession();
+    // --- TEMEL MOTOR (JS) ---
+    function updateLines() { const l = editor.value.split('\n').length; ln.innerHTML = Array.from({length:l}, (_,i)=>i+1).join('<br>'); }
+    
+    function addTab(n="İsimsiz.html", c=""){
+        tabCounter++; tabs.push({id:tabCounter, name:n, content:c, his:[c], i:0}); switchTab(tabCounter);
     }
-    isProg = false;
-});
 
-// 2. MOBİL UZUN BASMA (EKSİKTİ - OPTİMİZE EDİLDİ)
-let tTimer;
-editor.addEventListener('touchstart', e => { tTimer = setTimeout(() => showCtx(e.touches[0].clientX, e.touches[0].clientY), 600); });
-editor.addEventListener('touchend', () => clearTimeout(tTimer));
-editor.oncontextmenu = e => { e.preventDefault(); showCtx(e.clientX, e.clientY); };
+    function switchTab(id){
+        if(activeTabId){ let t=tabs.find(x=>x.id===activeTabId); if(t) t.content=editor.value; }
+        activeTabId=id; let t=tabs.find(x=>x.id===id); isProg=true; editor.value=t.content; 
+        document.getElementById('fileNameDisplay').textContent=t.name; renderTabs(); updateLines(); saveSession();
+    }
 
-function showCtx(x, y) {
-    if(x + 250 > window.innerWidth) x = window.innerWidth - 260;
-    iosMenu.style.left = x + "px"; iosMenu.style.top = (y - 40) + "px";
-    iosMenu.classList.add("active");
-}
+    function renderTabs(){
+        const div=document.getElementById('tabsDiv'); div.innerHTML='';
+        tabs.forEach(t=>{
+            const el=document.createElement('div'); el.className=`tab ${t.id===activeTabId?'active':''}`;
+            el.innerHTML=`<span>${t.name}</span><span onclick="event.stopPropagation();delTab(${t.id})" style="margin-left:8px;opacity:0.5">×</span>`;
+            el.onclick=()=>switchTab(t.id); div.appendChild(el);
+        });
+    }
 
-// 3. İLERİ / GERİ ARAMA
-function doSearch(fwd) {
-    const txt = editor.value.toLowerCase(), word = document.getElementById("searchInput").value.toLowerCase();
-    if(!word) return;
-    let i = fwd ? txt.indexOf(word, lastIdx) : txt.lastIndexOf(word, lastIdx - word.length - 1);
-    if(i === -1) i = fwd ? txt.indexOf(word) : txt.lastIndexOf(word);
-    if(i !== -1) { editor.setSelectionRange(i, i + word.length); lastIdx = i + word.length; editor.focus(); }
-}
-function toggleSearch() { document.getElementById("searchBar").classList.toggle("active"); lastIdx = 0; }
+    function delTab(id){ if(tabs.length===1)return; tabs=tabs.filter(t=>t.id!==id); switchTab(tabs[0].id); }
 
-// 4. MIME VE DOSYA YÖNETİMİ
-function saveFile(asNew) {
-    let t=tabs.find(x=>x.id===active), n=t.name;
-    if(asNew || n==="İsimsiz.html") { n=prompt("Dosya adı (örn: index.html):", n); if(!n) return; t.name=n; }
-    const ext = n.split(".").pop();
-    const mimes = {html:"text/html",js:"text/javascript",css:"text/css",json:"application/json",md:"text/markdown",csv:"text/csv"};
-    let blob = new Blob([editor.value], {type: mimes[ext] || "text/plain"});
-    let a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=n; a.click(); renderTabs();
-}
+    // --- AKSİYONLAR (KOPYALA, YAPIŞTIR VB) ---
+    async function handleAct(act){
+        editor.focus(); const s=editor.selectionStart, e=editor.selectionEnd;
+        if(act==='selectAll') editor.setSelectionRange(0, editor.value.length);
+        else if(act==='copy') { if(s!==e) await navigator.clipboard.writeText(editor.value.substring(s,e)); showToast("Kopyalandı!"); }
+        else if(act==='cut') { if(s!==e) { await navigator.clipboard.writeText(editor.value.substring(s,e)); editor.setRangeText('',s,e,'end'); } }
+        else if(act==='paste') { const t=await navigator.clipboard.readText(); editor.setRangeText(t,s,e,'end'); }
+        else if(act==='delete') editor.setRangeText('',s,e,'end');
+        updateLines(); ctxMenu.classList.remove('active');
+    }
 
-// 5. CORE JS
-function updateLines() { lines.innerHTML = Array.from({length: editor.value.split("\n").length}, (_,i)=>i+1).join("<br>"); }
-function addTab(n="İsimsiz.html", c=""){ id++; tabs.push({id, name:n, content:c, his:[c], i:0}); switchTab(id); }
-function switchTab(tid){
-    if(active){ let t=tabs.find(x=>x.id===active); if(t) t.content=editor.value; }
-    active=tid; let t=tabs.find(x=>x.id===tid); isProg=true; editor.value=t.content; fileName.textContent=t.name; renderTabs(); updateLines();
-}
-function renderTabs(){
-    tabsDiv.innerHTML=""; tabs.forEach(t=>{
-        let el=document.createElement("div"); el.className="tab "+(t.id===active?"active":"");
-        el.innerHTML=`<span>${t.name}</span><span onclick="event.stopPropagation();delTab(${t.id})">×</span>`;
-        el.onclick=()=>switchTab(t.id); tabsDiv.appendChild(el);
-    });
-}
-function delTab(tid){ if(tabs.length===1)return; tabs=tabs.filter(x=>x.id!==tid); if(active===tid)switchTab(tabs[0].id); else renderTabs(); }
+    function ins(t){ editor.setRangeText(t, editor.selectionStart, editor.selectionEnd, 'end'); editor.focus(); updateLines(); }
 
-// 6. HAFIZA (STORAGE)
-function saveSession(){ localStorage.setItem("alpTabs",JSON.stringify(tabs)); localStorage.setItem("alpActive",active); }
-function loadSession(){
-    let t=JSON.parse(localStorage.getItem("alpTabs")), act=localStorage.getItem("alpActive");
-    if(t && t.length>0){ tabs=t; id=Math.max(...t.map(x=>x.id)); switchTab(parseInt(act)||t[0].id); } else addTab();
-    curFS = parseInt(localStorage.getItem("fs")) || 16; setFS(curFS);
-    if(localStorage.getItem("theme")==="dark") document.body.classList.add("dark");
-}
+    // --- MENÜ KONTROLLERİ ---
+    document.getElementById('btnMenuToggle').onclick = (e) => { e.stopPropagation(); mainMenu.classList.toggle('active'); };
+    
+    editor.oncontextmenu = (e) => {
+        e.preventDefault();
+        ctxMenu.style.display = 'flex';
+        let x = e.clientX, y = e.clientY;
+        if(x + 200 > window.innerWidth) x = window.innerWidth - 210;
+        if(y + 250 > window.innerHeight) y = window.innerHeight - 260;
+        ctxMenu.style.left = x + 'px'; ctxMenu.style.top = y + 'px';
+        ctxMenu.classList.add('active');
+    };
 
-function undo(){ let t=tabs.find(x=>x.id===active); if(t.i>0){t.i--;isProg=true;editor.value=t.his[t.i];updateLines()} }
-function redo(){ let t=tabs.find(x=>x.id===active); if(t.i<t.his.length-1){t.i++;isProg=true;editor.value=t.his[t.i];updateLines()} }
-function ins(t){ editor.setRangeText(t,editor.selectionStart,editor.selectionEnd,'end'); editor.focus(); updateLines(); }
-function fontSize(){ let s=prompt("Piksel cinsinden boyut:", curFS); if(s) setFS(parseInt(s)); }
-function setFS(s){ curFS=s; document.documentElement.style.setProperty("--fs", s+"px"); localStorage.setItem("fs",s); }
-function toggleTheme(){ document.body.classList.toggle("dark"); localStorage.setItem("theme", document.body.classList.contains("dark")?"dark":"light"); }
-function openFile(){ document.getElementById("fileInput").click(); }
-fileInput.onchange=e=>{
-    let f=e.target.files[0], r=new FileReader();
-    r.onload=ev=>{ let t=tabs.find(x=>x.id===active); t.name=f.name; t.content=ev.target.result; t.his=[ev.target.result]; t.i=0; switchTab(t.id); }; r.readAsText(f);
-};
+    window.onclick = () => { mainMenu.classList.remove('active'); ctxMenu.classList.remove('active'); };
 
-async function handleAct(act){
-    editor.focus(); let s=editor.selectionStart, e=editor.selectionEnd;
-    if(act==='copy') { if(s!==e) await navigator.clipboard.writeText(editor.value.substring(s,e)); showToast("Kopyalandı"); }
-    else if(act==='cut') { if(s!==e) { await navigator.clipboard.writeText(editor.value.substring(s,e)); editor.setRangeText('',s,e,'end'); } }
-    else if(act==='paste') { let t=await navigator.clipboard.readText(); editor.setRangeText(t,s,e,'end'); }
-    else if(act==='selectAll') editor.setSelectionRange(0, editor.value.length);
-    else if(act==='del') editor.setRangeText('',s,e,'end');
-    updateLines(); iosMenu.classList.remove("active");
-}
+    // --- HAFIZA VE DOSYA ---
+    function saveFile(asNew){
+        let t=tabs.find(x=>x.id===activeTabId); let n=t.name;
+        if(asNew || n==="İsimsiz.html"){ n=prompt("Dosya adı:", n); if(!n) return; t.name=n; renderTabs(); }
+        const b=new Blob([editor.value], {type:'text/plain'});
+        const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=n; a.click();
+    }
 
-function showToast(m){ const t=document.getElementById("toast"); t.textContent=m; t.style.display="block"; setTimeout(()=>t.style.display="none",2000); }
-menuBtn.onclick=e=>{ e.stopPropagation(); menu.classList.toggle("active"); };
-window.onclick=()=>{ menu.classList.remove("active"); iosMenu.classList.remove("active"); };
-loadSession();
+    fileInput.onchange = (e) => {
+        const f=e.target.files[0]; if(!f) return;
+        const r=new FileReader(); r.onload=(ev)=>{
+            const t=tabs.find(x=>x.id===activeTabId); t.name=f.name; t.content=ev.target.result; t.his=[ev.target.result]; t.i=0; switchTab(t.id);
+        }; r.readAsText(f);
+    };
+
+    function undo(){ let t=tabs.find(x=>x.id===activeTabId); if(t.i>0){t.i--; isProg=true; editor.value=t.his[t.i]; updateLines();} }
+    function redo(){ let t=tabs.find(x=>x.id===activeTabId); if(t.i<t.his.length-1){t.i++; isProg=true; editor.value=t.his[t.i]; updateLines();} }
+    function changeFS(){ let s=prompt("Boyut:", curFS); if(s){curFS=s; document.documentElement.style.setProperty('--fs', s+'px'); localStorage.setItem('alpFS', s);}}
+    function toggleTheme(){ document.body.classList.toggle('dark-theme'); }
+    function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.style.display='block'; setTimeout(()=>t.style.display='none', 2000);}
+
+    // Başlat
+    function saveSession(){ localStorage.setItem('alpTabs', JSON.stringify(tabs)); localStorage.setItem('alpActive', activeTabId); }
+    function loadSession(){
+        const t=JSON.parse(localStorage.getItem('alpTabs')), act=localStorage.getItem('alpActive');
+        if(t && t.length>0){ tabs=t; tabCounter=Math.max(...t.map(x=>x.id)); switchTab(parseInt(act)||t[0].id); } else addTab();
+        const s=localStorage.getItem('alpFS'); if(s){curFS=s; document.documentElement.style.setProperty('--fs', s+'px');}
+    }
+
+    editor.oninput = () => {
+        updateLines(); const t=tabs.find(x=>x.id===activeTabId);
+        if(!isProg){ t.his.push(editor.value); t.i++; } isProg=false; saveSession();
+    };
+    editor.onscroll = () => { ln.scrollTop = editor.scrollTop; ctxMenu.classList.remove('active'); };
+
+    document.getElementById('btnRun').onclick = () => { window.open().document.write(editor.value); };
+
+    loadSession();
 </script>
 </body>
 </html>
