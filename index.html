@@ -4,59 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>AlpEditör Ultra Fix</title>
+    <title>AlpEditör Final Pro</title>
     <style>
         :root {
+            --ios-bg: #f2f2f7; --ios-header: #f8f8f8; --ios-blue: #007AFF; --ios-border: #c6c6c8;
+            --ios-text: #000000; --ios-menu-bg: rgba(255, 255, 255, 0.9); --ios-tab-bg: #e5e5ea;
+            --ios-tab-active: #ffffff; --ios-line-num: #8e8e93; --fs: 16px;
+        }
+        body.dark-theme {
             --ios-bg: #000000; --ios-header: #1c1c1e; --ios-blue: #0a84ff; --ios-border: #38383a;
-            --ios-text: #ffffff; --ios-menu-bg: rgba(44, 44, 46, 0.98); --ios-tab-bg: #2c2c2e;
-            --fs: 16px; --glass: blur(25px) saturate(180%);
+            --ios-text: #ffffff; --ios-menu-bg: rgba(28, 28, 30, 0.95); --ios-tab-bg: #2c2c2e;
+            --ios-tab-active: #000000; --ios-line-num: #636366;
         }
-        body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background: var(--ios-bg); color: var(--ios-text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background: var(--ios-bg); color: var(--ios-text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; transition: 0.3s; }
 
-        /* HEADER DÜZELTME: Üç Nokta Menüsü Sağda Sabitlendi */
-        header { 
-            background: var(--ios-header); border-bottom: 1px solid var(--ios-border); 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 10px 15px; padding-top: max(10px, env(safe-area-inset-top)); 
-            z-index: 5000; position: relative;
-        }
-        .btn-icon { color: var(--ios-blue); background: none; border: none; font-size: 24px; cursor: pointer; padding: 5px; }
+        /* Header & Üç Nokta */
+        header { background: var(--ios-header); border-bottom: 1px solid var(--ios-border); display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; padding-top: max(10px, env(safe-area-inset-top)); z-index: 1000; position: relative; }
+        .btn-icon { color: var(--ios-blue); background: none; border: none; font-size: 24px; cursor: pointer; }
 
-        /* ANA MENÜ DÜZELTME: Görseldeki gibi solda değil, butonun altında açılır */
+        /* Dropdown Menü (Aç, Kaydet vb.) */
         .dropdown-menu { 
-            position: absolute; top: 100%; right: 10px; width: 220px;
+            position: absolute; top: 100%; right: 10px; width: 200px;
             background: var(--ios-menu-bg); border-radius: 14px; border: 1px solid var(--ios-border);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
-            display: none; flex-direction: column; z-index: 6000; overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            display: none; flex-direction: column; z-index: 2000;
         }
         .dropdown-menu.active { display: flex; }
         .menu-btn { background: none; border: none; border-bottom: 0.5px solid var(--ios-border); color: var(--ios-blue); padding: 14px 20px; text-align: left; font-size: 16px; cursor: pointer; }
         .menu-btn:last-child { border-bottom: none; }
 
-        /* SAĞ TIK (CONTEXT) MENÜSÜ DÜZELTME: Ekran görüntüsündeki gibi yatay değil, dikey ve şık iOS stili */
+        /* Sağ Tık Menüsü (IOS Stil) */
         .ios-menu { 
             position: fixed; background: var(--ios-menu-bg); border-radius: 12px; 
-            border: 1px solid var(--ios-border); box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
-            display: none; flex-direction: column; z-index: 7000; width: 180px;
+            border: 1px solid var(--ios-border); box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            display: none; flex-direction: column; z-index: 3000; width: 160px;
         }
         .ios-menu.active { display: flex; }
-        .ios-menu button { background: none; border: none; border-bottom: 0.5px solid var(--ios-border); color: var(--ios-text); padding: 12px 20px; text-align: left; font-size: 15px; cursor: pointer; }
+        .ios-menu button { background: none; border: none; border-bottom: 0.5px solid var(--ios-border); color: var(--ios-text); padding: 12px 15px; text-align: left; font-size: 15px; cursor: pointer; }
 
-        /* EDİTÖR ALANI */
+        /* Yazı Boyutu POPUP (Prompt Değil!) */
+        .popup-window { 
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: var(--ios-menu-bg); padding: 25px; border-radius: 20px;
+            border: 1px solid var(--ios-border); box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            display: none; flex-direction: column; align-items: center; gap: 20px; z-index: 4000; backdrop-filter: blur(20px);
+        }
+        .popup-window.active { display: flex; }
+        .fs-controls { display: flex; align-items: center; gap: 25px; }
+        .fs-btn { width: 50px; height: 50px; border-radius: 50%; border: 1px solid var(--ios-blue); color: var(--ios-blue); font-size: 24px; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        /* Editör & Sekmeler */
         .tabs { display: flex; background: var(--ios-header); border-bottom: 1px solid var(--ios-border); overflow-x: auto; scrollbar-width: none; }
-        .tab { padding: 10px 15px; background: var(--ios-tab-bg); border-right: 1px solid var(--ios-border); white-space: nowrap; cursor: pointer; font-size: 14px; }
-        .tab.active { background: var(--ios-bg); font-weight: bold; border-bottom: 2px solid var(--ios-blue); }
+        .tab { padding: 10px 15px; background: var(--ios-tab-bg); border-right: 1px solid var(--ios-border); white-space: nowrap; cursor: pointer; font-size: 14px; color: var(--ios-text); }
+        .tab.active { background: var(--ios-tab-active); font-weight: bold; }
 
         .editor-container { display: flex; flex: 1; overflow: hidden; position: relative; }
-        .lines { width: 45px; background: var(--ios-header); padding: 15px 5px; text-align: right; color: #666; font-family: monospace; font-size: var(--fs); border-right: 1px solid var(--ios-border); user-select: none; }
+        .lines { width: 45px; background: var(--ios-header); padding: 15px 5px; text-align: right; color: var(--ios-line-num); font-family: monospace; font-size: var(--fs); border-right: 1px solid var(--ios-border); user-select: none; }
         textarea { flex: 1; border: none; outline: none; padding: 15px; background: transparent; color: var(--ios-text); font-family: monospace; font-size: var(--fs); line-height: 1.5; resize: none; overflow-y: auto; white-space: pre; }
 
-        /* TOOLBAR */
-        .toolbar { display: flex; background: var(--ios-header); border-top: 1px solid var(--ios-border); overflow-x: auto; padding: 8px; gap: 6px; }
-        .toolbar button { background: var(--ios-tab-bg); color: var(--ios-text); border: 1px solid var(--ios-border); border-radius: 8px; padding: 12px; min-width: 44px; font-family: monospace; }
+        /* Toolbar */
+        .toolbar { display: flex; background: var(--ios-header); border-top: 1px solid var(--ios-border); overflow-x: auto; padding: 10px; gap: 8px; }
+        .toolbar button { background: var(--ios-tab-bg); color: var(--ios-text); border: 1px solid var(--ios-border); border-radius: 8px; padding: 12px; min-width: 48px; font-family: monospace; }
         
-        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 10px 20px; border-radius: 20px; display: none; z-index: 8000; font-size: 14px; }
+        input[type="file"] { display: none; }
     </style>
 </head>
 <body class="dark-theme">
@@ -64,18 +75,18 @@
 <header>
     <div id="fileNameDisplay" style="font-weight: bold;">İsimsiz.html</div>
     <div style="display:flex; gap:10px;">
-        <button class="btn-icon" id="btnRun">▶️</button>
+        <button class="btn-icon" onclick="runCode()">▶️</button>
         <button class="btn-icon" id="btnMenuToggle">•••</button>
     </div>
     
     <div class="dropdown-menu" id="mainMenu">
-        <button class="menu-btn" onclick="document.getElementById('fileInput').click()">📁 Dosya Aç</button>
+        <button class="menu-btn" onclick="document.getElementById('fileInput').click()">📁 Aç</button>
         <button class="menu-btn" onclick="saveFile(false)">💾 Kaydet</button>
         <button class="menu-btn" onclick="saveFile(true)">📑 Farklı Kaydet</button>
         <button class="menu-btn" onclick="undo()">↩️ Geri Al</button>
         <button class="menu-btn" onclick="redo()">↪️ İleri Al</button>
-        <button class="menu-btn" onclick="toggleTheme()">🌓 Tema Değiştir</button>
-        <button class="menu-btn" onclick="changeFS()">📏 Yazı Boyutu</button>
+        <button class="menu-btn" onclick="showFS()">📏 Yazı Boyutu</button>
+        <button class="menu-btn" id="themeToggleBtn">🌓 Tema Değiştir</button>
     </div>
 </header>
 
@@ -104,66 +115,89 @@
     <button onclick="handleAct('delete')" style="color:red">Sil</button>
 </div>
 
-<div id="toast" class="toast">Kopyalandı!</div>
-<input type="file" id="fileInput" style="display:none;">
+<div id="fontSizePopup" class="popup-window">
+    <div style="font-weight: bold; font-size: 18px;">Yazı Boyutu</div>
+    <div class="fs-controls">
+        <button class="fs-btn" onclick="changeFS(-1)">-</button>
+        <span id="fsVal" style="font-weight: bold; font-size: 20px;">16px</span>
+        <button class="fs-btn" onclick="changeFS(1)">+</button>
+    </div>
+    <button onclick="document.getElementById('fontSizePopup').classList.remove('active')" style="color: var(--ios-blue); border: none; background: none; font-size: 16px; font-weight: bold;">Tamam</button>
+</div>
+
+<input type="file" id="fileInput">
 
 <script>
-    const editor = document.getElementById('editor'), ln = document.getElementById('lineNumbers'), mainMenu = document.getElementById('mainMenu'), ctxMenu = document.getElementById('iosContextMenu'), fileInput = document.getElementById('fileInput');
+    const editor = document.getElementById('editor'), ln = document.getElementById('lineNumbers'), mainMenu = document.getElementById('mainMenu'), ctxMenu = document.getElementById('iosContextMenu'), fsPopup = document.getElementById('fontSizePopup');
     let tabs = [], activeTabId = null, tabCounter = 0, isProg = false, curFS = 16;
 
-    // --- TEMEL MOTOR (JS) ---
-    function updateLines() { const l = editor.value.split('\n').length; ln.innerHTML = Array.from({length:l}, (_,i)=>i+1).join('<br>'); }
-    
-    function addTab(n="İsimsiz.html", c=""){
-        tabCounter++; tabs.push({id:tabCounter, name:n, content:c, his:[c], i:0}); switchTab(tabCounter);
+    // --- 1. TEMA DEĞİŞTİRME (KESİN ÇÖZÜM) ---
+    document.getElementById('themeToggleBtn').onclick = (e) => {
+        e.stopPropagation();
+        document.body.classList.toggle('dark-theme');
+        const isDark = document.body.classList.contains('dark-theme');
+        localStorage.setItem('alpTheme', isDark ? 'dark' : 'light');
+        mainMenu.classList.remove('active');
+    };
+
+    // --- 2. YAZI BOYUTU POPUP ---
+    function showFS() { fsPopup.classList.add('active'); mainMenu.classList.remove('active'); }
+    function changeFS(val) {
+        curFS += val;
+        document.documentElement.style.setProperty('--fs', curFS + 'px');
+        document.getElementById('fsVal').textContent = curFS + 'px';
+        localStorage.setItem('alpFS', curFS);
     }
 
-    function switchTab(id){
-        if(activeTabId){ let t=tabs.find(x=>x.id===activeTabId); if(t) t.content=editor.value; }
-        activeTabId=id; let t=tabs.find(x=>x.id===id); isProg=true; editor.value=t.content; 
-        document.getElementById('fileNameDisplay').textContent=t.name; renderTabs(); updateLines(); saveSession();
-    }
-
-    function renderTabs(){
-        const div=document.getElementById('tabsDiv'); div.innerHTML='';
-        tabs.forEach(t=>{
-            const el=document.createElement('div'); el.className=`tab ${t.id===activeTabId?'active':''}`;
-            el.innerHTML=`<span>${t.name}</span><span onclick="event.stopPropagation();delTab(${t.id})" style="margin-left:8px;opacity:0.5">×</span>`;
-            el.onclick=()=>switchTab(t.id); div.appendChild(el);
-        });
-    }
-
-    function delTab(id){ if(tabs.length===1)return; tabs=tabs.filter(t=>t.id!==id); switchTab(tabs[0].id); }
-
-    // --- AKSİYONLAR (KOPYALA, YAPIŞTIR VB) ---
-    async function handleAct(act){
-        editor.focus(); const s=editor.selectionStart, e=editor.selectionEnd;
-        if(act==='selectAll') editor.setSelectionRange(0, editor.value.length);
-        else if(act==='copy') { if(s!==e) await navigator.clipboard.writeText(editor.value.substring(s,e)); showToast("Kopyalandı!"); }
-        else if(act==='cut') { if(s!==e) { await navigator.clipboard.writeText(editor.value.substring(s,e)); editor.setRangeText('',s,e,'end'); } }
-        else if(act==='paste') { const t=await navigator.clipboard.readText(); editor.setRangeText(t,s,e,'end'); }
-        else if(act==='delete') editor.setRangeText('',s,e,'end');
-        updateLines(); ctxMenu.classList.remove('active');
-    }
-
-    function ins(t){ editor.setRangeText(t, editor.selectionStart, editor.selectionEnd, 'end'); editor.focus(); updateLines(); }
-
-    // --- MENÜ KONTROLLERİ ---
-    document.getElementById('btnMenuToggle').onclick = (e) => { e.stopPropagation(); mainMenu.classList.toggle('active'); };
-    
+    // --- 3. SAĞ TIK MENÜSÜ (OTOMATİK KAPANIR) ---
     editor.oncontextmenu = (e) => {
         e.preventDefault();
         ctxMenu.style.display = 'flex';
         let x = e.clientX, y = e.clientY;
-        if(x + 200 > window.innerWidth) x = window.innerWidth - 210;
-        if(y + 250 > window.innerHeight) y = window.innerHeight - 260;
+        if(x + 180 > window.innerWidth) x = window.innerWidth - 190;
         ctxMenu.style.left = x + 'px'; ctxMenu.style.top = y + 'px';
         ctxMenu.classList.add('active');
     };
 
-    window.onclick = () => { mainMenu.classList.remove('active'); ctxMenu.classList.remove('active'); };
+    // Menüleri kapatma (Herhangi bir yere tıklayınca)
+    window.addEventListener('click', () => {
+        mainMenu.classList.remove('active');
+        ctxMenu.classList.remove('active');
+    });
 
-    // --- HAFIZA VE DOSYA ---
+    // --- 4. EDİTÖR MOTORU ---
+    function updateLines() { const l = editor.value.split('\n').length; ln.innerHTML = Array.from({length:l}, (_,i)=>i+1).join('<br>'); }
+    function ins(t){ editor.setRangeText(t, editor.selectionStart, editor.selectionEnd, 'end'); editor.focus(); updateLines(); }
+
+    function addTab(n="İsimsiz.html", c=""){
+        tabCounter++; tabs.push({id:tabCounter, name:n, content:c, his:[c], i:0}); switchTab(tabCounter);
+    }
+    function switchTab(id){
+        if(activeTabId){ let t=tabs.find(x=>x.id===activeTabId); if(t) t.content=editor.value; }
+        activeTabId=id; let t=tabs.find(x=>x.id===id); isProg=true; editor.value=t.content; 
+        document.getElementById('fileNameDisplay').textContent=t.name; renderTabs(); updateLines();
+    }
+    function renderTabs(){
+        const div=document.getElementById('tabsDiv'); div.innerHTML='';
+        tabs.forEach(t=>{
+            const el=document.createElement('div'); el.className=`tab ${t.id===activeTabId?'active':''}`;
+            el.innerHTML=`${t.name} <span onclick="event.stopPropagation();delTab(${t.id})" style="margin-left:8px;opacity:0.5">×</span>`;
+            el.onclick=()=>switchTab(t.id); div.appendChild(el);
+        });
+    }
+    function delTab(id){ if(tabs.length===1)return; tabs=tabs.filter(t=>t.id!==id); switchTab(tabs[0].id); }
+
+    async function handleAct(act){
+        editor.focus();
+        if(act==='selectAll') editor.select();
+        else if(act==='copy') await navigator.clipboard.writeText(editor.value.substring(editor.selectionStart, editor.selectionEnd));
+        else if(act==='cut') { await navigator.clipboard.writeText(editor.value.substring(editor.selectionStart, editor.selectionEnd)); editor.setRangeText('', editor.selectionStart, editor.selectionEnd, 'end'); }
+        else if(act==='paste') { const t=await navigator.clipboard.readText(); editor.setRangeText(t, editor.selectionStart, editor.selectionEnd, 'end'); }
+        else if(act==='delete') editor.setRangeText('', editor.selectionStart, editor.selectionEnd, 'end');
+        updateLines();
+    }
+
+    // --- 5. DOSYA & HAFIZA ---
     function saveFile(asNew){
         let t=tabs.find(x=>x.id===activeTabId); let n=t.name;
         if(asNew || n==="İsimsiz.html"){ n=prompt("Dosya adı:", n); if(!n) return; t.name=n; renderTabs(); }
@@ -171,7 +205,7 @@
         const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=n; a.click();
     }
 
-    fileInput.onchange = (e) => {
+    document.getElementById('fileInput').onchange = (e) => {
         const f=e.target.files[0]; if(!f) return;
         const r=new FileReader(); r.onload=(ev)=>{
             const t=tabs.find(x=>x.id===activeTabId); t.name=f.name; t.content=ev.target.result; t.his=[ev.target.result]; t.i=0; switchTab(t.id);
@@ -180,27 +214,27 @@
 
     function undo(){ let t=tabs.find(x=>x.id===activeTabId); if(t.i>0){t.i--; isProg=true; editor.value=t.his[t.i]; updateLines();} }
     function redo(){ let t=tabs.find(x=>x.id===activeTabId); if(t.i<t.his.length-1){t.i++; isProg=true; editor.value=t.his[t.i]; updateLines();} }
-    function changeFS(){ let s=prompt("Boyut:", curFS); if(s){curFS=s; document.documentElement.style.setProperty('--fs', s+'px'); localStorage.setItem('alpFS', s);}}
-    function toggleTheme(){ document.body.classList.toggle('dark-theme'); }
-    function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.style.display='block'; setTimeout(()=>t.style.display='none', 2000);}
 
-    // Başlat
-    function saveSession(){ localStorage.setItem('alpTabs', JSON.stringify(tabs)); localStorage.setItem('alpActive', activeTabId); }
-    function loadSession(){
-        const t=JSON.parse(localStorage.getItem('alpTabs')), act=localStorage.getItem('alpActive');
-        if(t && t.length>0){ tabs=t; tabCounter=Math.max(...t.map(x=>x.id)); switchTab(parseInt(act)||t[0].id); } else addTab();
-        const s=localStorage.getItem('alpFS'); if(s){curFS=s; document.documentElement.style.setProperty('--fs', s+'px');}
-    }
+    function runCode() { const w = window.open(); w.document.write(editor.value); w.document.close(); }
+
+    document.getElementById('btnMenuToggle').onclick = (e) => { e.stopPropagation(); mainMenu.classList.toggle('active'); };
+
+    // Başlangıç Yüklemesi
+    window.onload = () => {
+        const theme = localStorage.getItem('alpTheme') || 'dark';
+        if(theme === 'light') document.body.classList.remove('dark-theme');
+        const fs = localStorage.getItem('alpFS') || 16;
+        curFS = parseInt(fs);
+        document.documentElement.style.setProperty('--fs', fs + 'px');
+        document.getElementById('fsVal').textContent = fs + 'px';
+        addTab();
+    };
 
     editor.oninput = () => {
         updateLines(); const t=tabs.find(x=>x.id===activeTabId);
-        if(!isProg){ t.his.push(editor.value); t.i++; } isProg=false; saveSession();
+        if(!isProg){ t.his.push(editor.value); t.i++; } isProg=false;
     };
-    editor.onscroll = () => { ln.scrollTop = editor.scrollTop; ctxMenu.classList.remove('active'); };
-
-    document.getElementById('btnRun').onclick = () => { window.open().document.write(editor.value); };
-
-    loadSession();
+    editor.onscroll = () => { ln.scrollTop = editor.scrollTop; };
 </script>
 </body>
 </html>
