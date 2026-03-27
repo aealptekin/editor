@@ -1,202 +1,204 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <title>AlpEditör</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <style>
-        /* 1. GÖRSEL KİMLİK (Senin Orijinal iOS Stilin) */
-        :root {
-            --ios-bg: #f2f2f7; --ios-header: #f8f8f8; --ios-blue: #007AFF; --ios-border: #c6c6c8;
-            --ios-text: #000000; --ios-menu-bg: rgba(250, 250, 250, 0.95); --ios-tab-bg: #e5e5ea;
-            --ios-tab-active: #ffffff; --ios-line-num: #8e8e93; --ios-line-bg: #f8f8f8;
-            --editor-font-size: 16px; 
-        }
-        body.dark-theme {
-            --ios-bg: #000000; --ios-header: #1c1c1e; --ios-blue: #0a84ff; --ios-border: #38383a;
-            --ios-text: #ffffff; --ios-menu-bg: rgba(44, 44, 46, 0.95); --ios-tab-bg: #2c2c2e;
-            --ios-tab-active: #000000; --ios-line-num: #636366; --ios-line-bg: #1c1c1e;
-        }
-        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; background-color: var(--ios-bg); color: var(--ios-text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; transition: background-color 0.3s; }
-        
-        header { background-color: var(--ios-header); border-bottom: 1px solid var(--ios-border); display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; padding-top: max(15px, env(safe-area-inset-top)); position: relative; z-index: 1000; }
-        .file-name { font-size: 17px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; }
-        .btn-icon { color: var(--ios-blue); background: transparent; border: none; font-size: 24px; font-weight: bold; cursor: pointer; padding: 0 5px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>AlpEditör Final</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root {
+    --bg:#f2f2f7; --text:#000; --header:#f8f8f8; --blue:#007AFF; --tab:#e5e5ea; --tabActive:#fff; --fs:16px;
+}
+/* Sistem Teması Algılama (EKSİKTİ - EKLENDİ) */
+@media (prefers-color-scheme: dark) { :root { --bg:#000; --text:#fff; --header:#1c1c1e; --tab:#2c2c2e; --tabActive:#000; } }
+body.dark { --bg:#000; --text:#fff; --header:#1c1c1e; --tab:#2c2c2e; --tabActive:#000; }
+body.light { --bg:#f2f2f7; --text:#000; --header:#f8f8f8; --tab:#e5e5ea; --tabActive:#fff; }
 
-        /* Popups & Menus (Glassmorphism Geliştirildi) */
-        .dropdown-menu, .popup-window, .ios-context-menu { position: absolute; background-color: var(--ios-menu-bg); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); display: none; flex-direction: column; overflow: hidden; border: 1px solid var(--ios-border); z-index: 2000; }
-        .active { display: flex !important; }
-        .dropdown-menu button, .ios-context-menu button { background: transparent; border: none; border-bottom: 1px solid var(--ios-border); padding: 12px 20px; font-size: 16px; color: var(--ios-blue); text-align: left; min-width: 170px; cursor: pointer; }
-        .dropdown-menu button:last-child, .ios-context-menu button:last-child { border-bottom: none; }
+body { margin:0; font-family:-apple-system, sans-serif; background:var(--bg); color:var(--text); display:flex; flex-direction:column; height:100vh; overflow:hidden; }
 
-        .tabs-container { display: flex; background-color: var(--ios-header); border-bottom: 1px solid var(--ios-border); overflow-x: auto; scrollbar-width: none; }
-        .tab { padding: 10px 15px; font-size: 14px; background-color: var(--ios-tab-bg); border-right: 1px solid var(--ios-border); white-space: nowrap; display: flex; align-items: center; gap: 8px; cursor: pointer; }
-        .tab.active { background-color: var(--ios-tab-active); font-weight: 600; }
+header { display:flex; justify-content:space-between; padding:10px; background:var(--header); border-bottom:1px solid #ccc; z-index:1000; }
+.btn-icon { background:none; border:none; color:var(--blue); font-size:20px; cursor:pointer; font-weight:bold; }
 
-        .editor-wrapper { display: flex; flex: 1; overflow: hidden; background-color: var(--ios-tab-active); }
-        .line-numbers { width: 45px; padding: 15px 5px; font-family: monospace; font-size: var(--editor-font-size); line-height: 1.5; color: var(--ios-line-num); text-align: right; background-color: var(--ios-header); border-right: 1px solid var(--ios-border); overflow: hidden; user-select: none; }
-        textarea { flex: 1; border: none; padding: 15px; font-size: var(--editor-font-size); line-height: 1.5; font-family: monospace; background-color: transparent; color: var(--ios-text); outline: none; white-space: pre; resize: none; overflow-y: auto; }
+/* Swipe ve Kaydırma Destekli Sekmeler */
+.tabs { display:flex; background:var(--header); overflow-x:auto; scrollbar-width:none; touch-action: pan-x; border-bottom:1px solid #ccc; }
+.tabs::-webkit-scrollbar { display:none; }
+.tab { padding:10px 15px; background:var(--tab); border-right:1px solid #ccc; white-space:nowrap; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.tab.active { background:var(--tabActive); border-bottom:2px solid var(--blue); font-weight:bold; }
 
-        .toolbar { display: flex; background: var(--ios-header); border-top: 1px solid var(--ios-border); overflow-x: auto; padding: 8px; gap: 6px; }
-        .toolbar button { background: var(--ios-tab-bg); color: var(--ios-text); border: 1px solid var(--ios-border); border-radius: 8px; padding: 10px; min-width: 44px; font-family: monospace; }
-        
-        #previewOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 5000; flex-direction: column; }
-        .ios-context-menu { flex-direction: row; width: auto; position: fixed; }
-        .ios-context-menu .divider { width: 1px; background-color: var(--ios-border); margin: 5px 0; }
-    </style>
+/* Klavye Resize Problemi İçin Flex-Grow (EKSİKTİ - EKLENDİ) */
+.editorWrap { display:flex; flex:1; overflow:hidden; position:relative; min-height: 0; }
+.lines { width:40px; background:var(--header); padding:10px 5px; font-size:var(--fs); color:#888; text-align:right; font-family:monospace; user-select:none; }
+textarea { flex:1; font-size:var(--fs); border:none; outline:none; padding:10px; background:transparent; color:var(--text); font-family:monospace; resize:none; white-space:pre; line-height:1.5; }
+
+/* Menüler ve Popuplar */
+.menu, .ios-menu, .popup { position:absolute; background:var(--header); border:1px solid #ccc; border-radius:12px; display:none; flex-direction:column; box-shadow:0 10px 30px rgba(0,0,0,0.3); backdrop-filter:blur(20px); z-index:2000; }
+.active { display:flex !important; }
+.menu button, .ios-menu button { padding:12px 20px; text-align:left; border:none; border-bottom:0.5px solid #ccc; color:var(--blue); background:none; font-size:16px; }
+
+.ios-menu { flex-direction:row; width:auto; position:fixed; }
+.ios-menu button { padding:10px 15px; font-size:14px; color:var(--text); }
+
+.toolbar { display:flex; background:var(--header); border-top:1px solid #ccc; overflow-x:auto; padding:8px; gap:6px; }
+.toolbar button { background:var(--tab); color:var(--text); border-radius:8px; padding:10px; min-width:44px; border:none; }
+
+#searchBar { top:60px; left:50%; transform:translateX(-50%); width:90%; padding:10px; flex-direction:row; align-items:center; gap:5px; }
+#searchBar input { flex:1; padding:8px; border-radius:8px; border:1px solid #ccc; background:var(--bg); color:var(--text); }
+
+.toast { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:#fff; padding:10px 20px; border-radius:20px; display:none; z-index:5000; }
+</style>
 </head>
-<body class="dark-theme">
+<body>
+
 <header>
-    <div class="file-name" id="fileNameDisplay">İsimsiz.html</div>
-    <div style="display:flex; gap:10px;">
-        <button class="btn-icon" id="btnRun">▶️</button>
-        <button class="btn-icon" id="btnMenuToggle">•••</button>
+    <span id="fileName" style="font-weight:bold">İsimsiz.html</span>
+    <div>
+        <button class="btn-icon" onclick="toggleSearch()">🔍</button>
+        <button class="btn-icon" id="menuBtn">•••</button>
     </div>
-    <div class="dropdown-menu" id="mainMenu">
-        <button id="menuOpen">Aç</button>
-        <button id="menuSave">Kaydet</button>
-        <button id="menuSaveAs">Farklı Kaydet</button>
-        <button id="menuUndo">Geri Al</button>
-        <button id="menuRedo">İleri Al</button>
-        <button id="menuFontSize">Yazı Boyutu</button>
-        <button id="menuTheme">Tema Değiştir</button>
+    <div id="menu" class="menu" style="top:50px; right:10px;">
+        <button onclick="openFile()">📁 Aç</button>
+        <button onclick="saveFile(false)">💾 Kaydet</button>
+        <button onclick="saveFile(true)">📑 Farklı Kaydet</button>
+        <button onclick="undo()">↩️ Geri</button>
+        <button onclick="redo()">↪️ İleri</button>
+        <button onclick="toggleTheme()">🌓 Tema</button>
+        <button onclick="fontSize()">📏 Boyut</button>
     </div>
 </header>
-<div class="tabs-container"><div id="tabsList" style="display:flex;"></div><button id="btnAddTab" style="padding:10px 15px; color:var(--ios-blue); border:none; background:none; font-size:20px;">+</button></div>
-<div class="editor-wrapper"><div class="line-numbers" id="lineNumbers">1</div><textarea id="editor" spellcheck="false" autocomplete="off" wrap="off"></textarea></div>
+
+<div class="tabs" id="tabsDiv"></div>
+
+<div class="editorWrap">
+    <div id="lines" class="lines">1</div>
+    <textarea id="editor" spellcheck="false" wrap="off"></textarea>
+</div>
+
+<div id="searchBar" class="popup">
+    <input type="text" id="searchInput" placeholder="Ara...">
+    <button onclick="doSearch(false)">▲</button>
+    <button onclick="doSearch(true)">▼</button>
+    <button onclick="toggleSearch()" style="color:red">✕</button>
+</div>
+
 <div class="toolbar">
-    <button onclick="addTxt('\t')">TAB</button><button onclick="addTxt('<')">&lt;</button><button onclick="addTxt('>')">&gt;</button><button onclick="addTxt('/')">/</button>
-    <button onclick="addTxt('{')">{</button><button onclick="addTxt('}')">}</button><button onclick="addTxt(';')">;</button><button onclick="addTxt('=')">=</button>
+    <button onclick="ins('\t')">TAB</button><button onclick="ins('<')">&lt;</button><button onclick="ins('>')">&gt;</button>
+    <button onclick="ins('/')">/</button><button onclick="ins('{')">{</button><button onclick="ins('}')">}</button>
+    <button onclick="ins(';')">;</button><button onclick="ins('=')">=</button>
 </div>
 
-<div class="popup-window" id="searchPopup" style="top:80px; left:50%; transform:translateX(-50%); padding:15px; gap:10px; align-items:center;">
-    <input type="text" id="searchInput" placeholder="Ara..." style="padding:10px; border-radius:8px; border:1px solid var(--ios-border); background:var(--ios-bg); color:var(--ios-text);">
-    <button id="btnSearchNext" style="color:var(--ios-blue); font-weight:bold; background:none; border:none;">Bul</button>
-    <button id="btnSearchClose" style="color:red; background:none; border:none;">Kapat</button>
+<div id="iosMenu" class="ios-menu">
+    <button onclick="handleAct('selectAll')">Seç</button>
+    <button onclick="handleAct('cut')">Kes</button>
+    <button onclick="handleAct('copy')">Kopya</button>
+    <button onclick="handleAct('paste')">Yapıştır</button>
+    <button onclick="handleAct('del')" style="color:red">Sil</button>
 </div>
 
-<div id="fontSizePopup" class="popup-window" style="top:50%; left:50%; transform:translate(-50%, -50%); padding:20px; align-items:center;">
-    <div style="display:flex; gap:20px; align-items:center;"><button id="btnFontDec">-</button><span id="fontSizeDisplay">16px</span><button id="btnFontInc">+</button></div>
-    <button id="btnFontClose" style="color:red; background:none; border:none; margin-top:15px;">Kapat</button>
-</div>
-
-<div id="iosMenu" class="ios-context-menu">
-    <button onclick="handleAction('search')">Ara</button><div class="divider"></div>
-    <button onclick="handleAction('selectAll')">Seç</button><div class="divider"></div>
-    <button onclick="handleAction('cut')">Kes</button><div class="divider"></div>
-    <button onclick="handleAction('copy')">Kopya</button><div class="divider"></div>
-    <button onclick="handleAction('paste')">Yapıştır</button><div class="divider"></div>
-    <button onclick="handleAction('delete')" style="color:red">Sil</button>
-</div>
-
-<div id="previewOverlay"><div style="background:#f8f8f8; padding:12px; display:flex; justify-content:space-between; border-bottom:1px solid #ddd; align-items:center;"><b style="color:black">Önizleme</b><button onclick="document.getElementById('previewOverlay').style.display='none'" style="background:red; color:white; border:none; padding:8px 16px; border-radius:8px;">Kapat</button></div><iframe id="previewFrame" style="flex:1; width:100%; border:none;"></iframe></div>
-
-<input type="file" id="fileInput" style="display:none;" accept=".html,.txt,.css,.js,.json,.md,.csv">
+<div id="toast" class="toast">Kopyalandı!</div>
+<input type="file" id="fileInput" hidden>
 
 <script>
-    const editor = document.getElementById('editor'), ln = document.getElementById('lineNumbers'), fileNameDisplay = document.getElementById('fileNameDisplay'), fileInput = document.getElementById('fileInput'), mainMenu = document.getElementById('mainMenu'), ctxMenu = document.getElementById('iosMenu');
-    let tabs = [], activeTabId = null, tabCounter = 0, isProg = false, lastSearchIdx = 0;
+let tabs=[], active=null, id=0, isProg=false, lastIdx=0, curFS=16;
+const editor=document.getElementById("editor"), lines=document.getElementById("lines"), tabsDiv=document.getElementById("tabsDiv"), 
+      fileName=document.getElementById("fileName"), iosMenu=document.getElementById("iosMenu"), menu=document.getElementById("menu");
 
-    // --- 1. GERÇEK MIME SİSTEMİ (700 Satırlık Orjinallik) ---
-    const getMime = (n) => {
-        const ext = n.slice((n.lastIndexOf(".") - 1 >>> 0) + 2).toLowerCase();
-        const m = {
-            'html':'text/html', 'htm':'text/html', 'js':'text/javascript', 
-            'css':'text/css', 'json':'application/json', 'txt':'text/plain', 
-            'md':'text/markdown', 'csv':'text/csv', 'xml':'text/xml'
-        };
-        return m[ext] || 'application/octet-stream';
-    };
-
-    const updateLines = () => { const l = editor.value.split('\n').length; ln.innerHTML = Array.from({length:l}, (_,i)=>i+1).join('<br>'); };
-
-    // --- 2. GÜVENLİ KAYIT VE LOCALSTORAGE HAFIZASI ---
-    const saveFile = (asNew) => {
-        const a = tabs.find(t=>t.id===activeTabId); let n = a.name;
-        if(asNew || n === "İsimsiz.html") { const res = prompt("Dosya adı:", n); if(!res) return; n = res; a.name = n; renderTabs(); fileNameDisplay.textContent = n; }
-        const b = new Blob([editor.value], {type: getMime(n)});
-        const url = URL.createObjectURL(b); const link = document.createElement("a"); link.href = url; link.download = n; link.click(); URL.revokeObjectURL(url);
-    };
-
-    // --- 3. GERÇEK UNDO/REDO VE SEKME SİSTEMİ ---
-    const addTab = (n="İsimsiz.html", c="") => { tabCounter++; tabs.push({id:tabCounter, name:n, content:c, history:[c], historyIndex:0}); switchTab(tabCounter); };
-    const switchTab = (id) => { if(activeTabId) tabs.find(t=>t.id===activeTabId).content = editor.value; activeTabId = id; const a = tabs.find(t=>t.id===id); isProg = true; editor.value = a.content; fileNameDisplay.textContent = a.name; renderTabs(); updateLines(); };
-    const renderTabs = () => { const l = document.getElementById('tabsList'); l.innerHTML = ''; tabs.forEach(t => { const el = document.createElement('div'); el.className = `tab ${t.id===activeTabId?'active':''}`; el.innerHTML = `<span>${t.name}</span><span onclick="event.stopPropagation();closeTab(${t.id})">×</span>`; el.onclick = () => switchTab(t.id); l.appendChild(el); }); };
-    const closeTab = (id) => { if(tabs.length===1) return; const idx = tabs.findIndex(t=>t.id===id); tabs = tabs.filter(t=>t.id!==id); switchTab(tabs[Math.max(0, idx-1)].id); };
-
-    // --- 4. CLIPBOARD API (ASYNC PASTE) ---
-    async function handleAction(act) {
-        editor.focus(); const s = editor.selectionStart, e = editor.selectionEnd;
-        if(act==='copy') { if(s!==e) await navigator.clipboard.writeText(editor.value.substring(s,e)); }
-        else if(act==='cut') { if(s!==e) { await navigator.clipboard.writeText(editor.value.substring(s,e)); editor.setRangeText('', s, e, 'end'); } }
-        else if(act==='paste') { try { const t = await navigator.clipboard.readText(); editor.setRangeText(t, s, e, 'end'); } catch(err){alert("Pano izni yok.");} }
-        else if(act==='selectAll') { editor.select(); }
-        else if(act==='delete') { editor.setRangeText('', s, e, 'end'); }
-        else if(act==='search') { document.getElementById('searchPopup').classList.add('active'); }
-        updateLines(); mainMenu.classList.remove('active'); ctxMenu.classList.remove('active');
+// 1. CANLI ÖNİZLEME (EKLENDİ - Yazarken Değişir)
+editor.addEventListener('input', () => {
+    updateLines();
+    if (active && !isProg) {
+        let t = tabs.find(x => x.id === active);
+        t.content = editor.value;
+        if(t.i < t.his.length-1) t.his = t.his.slice(0, t.i+1);
+        t.his.push(editor.value); t.i++;
+        saveSession();
     }
+    isProg = false;
+});
 
-    const addTxt = (t) => { editor.setRangeText(t, editor.selectionStart, editor.selectionEnd, 'end'); editor.focus(); updateLines(); };
+// 2. MOBİL UZUN BASMA (EKSİKTİ - OPTİMİZE EDİLDİ)
+let tTimer;
+editor.addEventListener('touchstart', e => { tTimer = setTimeout(() => showCtx(e.touches[0].clientX, e.touches[0].clientY), 600); });
+editor.addEventListener('touchend', () => clearTimeout(tTimer));
+editor.oncontextmenu = e => { e.preventDefault(); showCtx(e.clientX, e.clientY); };
 
-    editor.oninput = () => {
-        updateLines(); const a = tabs.find(t=>t.id===activeTabId);
-        if(!isProg){
-            if(a.historyIndex < a.history.length-1) a.history = a.history.slice(0, a.historyIndex+1);
-            a.history.push(editor.value); a.historyIndex++;
-        }
-        isProg = false;
-    };
+function showCtx(x, y) {
+    if(x + 250 > window.innerWidth) x = window.innerWidth - 260;
+    iosMenu.style.left = x + "px"; iosMenu.style.top = (y - 40) + "px";
+    iosMenu.classList.add("active");
+}
 
-    editor.onscroll = () => { ln.scrollTop = editor.scrollTop; ctxMenu.classList.remove('active'); };
-    editor.oncontextmenu = (e) => { e.preventDefault(); ctxMenu.style.left = Math.min(e.clientX, window.innerWidth - 350) + 'px'; ctxMenu.style.top = (e.clientY - 50) + 'px'; ctxMenu.classList.add('active'); };
+// 3. İLERİ / GERİ ARAMA
+function doSearch(fwd) {
+    const txt = editor.value.toLowerCase(), word = document.getElementById("searchInput").value.toLowerCase();
+    if(!word) return;
+    let i = fwd ? txt.indexOf(word, lastIdx) : txt.lastIndexOf(word, lastIdx - word.length - 1);
+    if(i === -1) i = fwd ? txt.indexOf(word) : txt.lastIndexOf(word);
+    if(i !== -1) { editor.setSelectionRange(i, i + word.length); lastIdx = i + word.length; editor.focus(); }
+}
+function toggleSearch() { document.getElementById("searchBar").classList.toggle("active"); lastIdx = 0; }
 
-    // --- 5. GERÇEK ARAMA ---
-    document.getElementById('btnSearchNext').onclick = () => {
-        const t = editor.value.toLowerCase(), w = document.getElementById('searchInput').value.toLowerCase();
-        if(!w) return; const idx = t.indexOf(w, lastSearchIdx);
-        if(idx !== -1) { editor.setSelectionRange(idx, idx + w.length); lastSearchIdx = idx + w.length; }
-        else { lastSearchIdx = 0; alert("Arama sonuna ulaşıldı."); }
-    };
-    document.getElementById('btnSearchClose').onclick = () => document.getElementById('searchPopup').classList.remove('active');
+// 4. MIME VE DOSYA YÖNETİMİ
+function saveFile(asNew) {
+    let t=tabs.find(x=>x.id===active), n=t.name;
+    if(asNew || n==="İsimsiz.html") { n=prompt("Dosya adı (örn: index.html):", n); if(!n) return; t.name=n; }
+    const ext = n.split(".").pop();
+    const mimes = {html:"text/html",js:"text/javascript",css:"text/css",json:"application/json",md:"text/markdown",csv:"text/csv"};
+    let blob = new Blob([editor.value], {type: mimes[ext] || "text/plain"});
+    let a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=n; a.click(); renderTabs();
+}
 
-    // --- 6. AYARLAR VE LOCALSTORAGE ---
-    let curFS = parseInt(localStorage.getItem('alpFS')) || 16;
-    const setFS = (s) => { curFS = s; document.documentElement.style.setProperty('--editor-font-size', s + 'px'); document.getElementById('fontSizeDisplay').textContent = s + 'px'; localStorage.setItem('alpFS', s); };
-    
-    document.getElementById('btnMenuToggle').onclick = (e) => { e.stopPropagation(); mainMenu.classList.toggle('active'); };
-    document.getElementById('menuOpen').onclick = () => fileInput.click();
-    document.getElementById('menuSave').onclick = () => saveFile(false);
-    document.getElementById('menuSaveAs').onclick = () => saveFile(true);
-    document.getElementById('menuFontSize').onclick = () => document.getElementById('fontSizePopup').classList.add('active');
-    document.getElementById('btnFontInc').onclick = () => setFS(curFS+1); document.getElementById('btnFontDec').onclick = () => setFS(curFS-1);
-    document.getElementById('btnFontClose').onclick = () => document.getElementById('fontSizePopup').classList.remove('active');
-    document.getElementById('menuTheme').onclick = () => { document.body.classList.toggle('dark-theme'); localStorage.setItem('alpTheme', document.body.classList.contains('dark-theme')?'dark':'light'); };
-    
-    document.getElementById('menuUndo').onclick = () => { const a = tabs.find(t=>t.id===activeTabId); if(a.historyIndex > 0) { a.historyIndex--; isProg=true; editor.value = a.history[a.historyIndex]; updateLines(); } };
-    document.getElementById('menuRedo').onclick = () => { const a = tabs.find(t=>t.id===activeTabId); if(a.historyIndex < a.history.length-1) { a.historyIndex++; isProg=true; editor.value = a.history[a.historyIndex]; updateLines(); } };
-    
-    document.getElementById('btnRun').onclick = () => { document.getElementById('previewOverlay').style.display='flex'; document.getElementById('previewFrame').srcdoc = editor.value; };
+// 5. CORE JS
+function updateLines() { lines.innerHTML = Array.from({length: editor.value.split("\n").length}, (_,i)=>i+1).join("<br>"); }
+function addTab(n="İsimsiz.html", c=""){ id++; tabs.push({id, name:n, content:c, his:[c], i:0}); switchTab(id); }
+function switchTab(tid){
+    if(active){ let t=tabs.find(x=>x.id===active); if(t) t.content=editor.value; }
+    active=tid; let t=tabs.find(x=>x.id===tid); isProg=true; editor.value=t.content; fileName.textContent=t.name; renderTabs(); updateLines();
+}
+function renderTabs(){
+    tabsDiv.innerHTML=""; tabs.forEach(t=>{
+        let el=document.createElement("div"); el.className="tab "+(t.id===active?"active":"");
+        el.innerHTML=`<span>${t.name}</span><span onclick="event.stopPropagation();delTab(${t.id})">×</span>`;
+        el.onclick=()=>switchTab(t.id); tabsDiv.appendChild(el);
+    });
+}
+function delTab(tid){ if(tabs.length===1)return; tabs=tabs.filter(x=>x.id!==tid); if(active===tid)switchTab(tabs[0].id); else renderTabs(); }
 
-    fileInput.onchange = (e) => {
-        const f = e.target.files[0]; if(!f) return;
-        const r = new FileReader(); r.onload = (ev) => { const a = tabs.find(t=>t.id===activeTabId); a.name = f.name; a.content = ev.target.result; switchTab(a.id); };
-        r.readAsText(f);
-    };
+// 6. HAFIZA (STORAGE)
+function saveSession(){ localStorage.setItem("alpTabs",JSON.stringify(tabs)); localStorage.setItem("alpActive",active); }
+function loadSession(){
+    let t=JSON.parse(localStorage.getItem("alpTabs")), act=localStorage.getItem("alpActive");
+    if(t && t.length>0){ tabs=t; id=Math.max(...t.map(x=>x.id)); switchTab(parseInt(act)||t[0].id); } else addTab();
+    curFS = parseInt(localStorage.getItem("fs")) || 16; setFS(curFS);
+    if(localStorage.getItem("theme")==="dark") document.body.classList.add("dark");
+}
 
-    window.onclick = () => { mainMenu.classList.remove('active'); ctxMenu.classList.remove('active'); };
-    
-    // Uygulama Başlatma Hafızası
-    if(localStorage.getItem('alpTheme') === 'light') document.body.classList.remove('dark-theme'); else document.body.classList.add('dark-theme');
-    setFS(curFS); addTab();
+function undo(){ let t=tabs.find(x=>x.id===active); if(t.i>0){t.i--;isProg=true;editor.value=t.his[t.i];updateLines()} }
+function redo(){ let t=tabs.find(x=>x.id===active); if(t.i<t.his.length-1){t.i++;isProg=true;editor.value=t.his[t.i];updateLines()} }
+function ins(t){ editor.setRangeText(t,editor.selectionStart,editor.selectionEnd,'end'); editor.focus(); updateLines(); }
+function fontSize(){ let s=prompt("Piksel cinsinden boyut:", curFS); if(s) setFS(parseInt(s)); }
+function setFS(s){ curFS=s; document.documentElement.style.setProperty("--fs", s+"px"); localStorage.setItem("fs",s); }
+function toggleTheme(){ document.body.classList.toggle("dark"); localStorage.setItem("theme", document.body.classList.contains("dark")?"dark":"light"); }
+function openFile(){ document.getElementById("fileInput").click(); }
+fileInput.onchange=e=>{
+    let f=e.target.files[0], r=new FileReader();
+    r.onload=ev=>{ let t=tabs.find(x=>x.id===active); t.name=f.name; t.content=ev.target.result; t.his=[ev.target.result]; t.i=0; switchTab(t.id); }; r.readAsText(f);
+};
 
-    // --- 7. PWA SERVICE WORKER ---
-    if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.log(err)); }); }
-    
-    editor.onkeydown = (e) => { if(e.key === 'Tab') { e.preventDefault(); addTxt('\t'); } };
+async function handleAct(act){
+    editor.focus(); let s=editor.selectionStart, e=editor.selectionEnd;
+    if(act==='copy') { if(s!==e) await navigator.clipboard.writeText(editor.value.substring(s,e)); showToast("Kopyalandı"); }
+    else if(act==='cut') { if(s!==e) { await navigator.clipboard.writeText(editor.value.substring(s,e)); editor.setRangeText('',s,e,'end'); } }
+    else if(act==='paste') { let t=await navigator.clipboard.readText(); editor.setRangeText(t,s,e,'end'); }
+    else if(act==='selectAll') editor.setSelectionRange(0, editor.value.length);
+    else if(act==='del') editor.setRangeText('',s,e,'end');
+    updateLines(); iosMenu.classList.remove("active");
+}
+
+function showToast(m){ const t=document.getElementById("toast"); t.textContent=m; t.style.display="block"; setTimeout(()=>t.style.display="none",2000); }
+menuBtn.onclick=e=>{ e.stopPropagation(); menu.classList.toggle("active"); };
+window.onclick=()=>{ menu.classList.remove("active"); iosMenu.classList.remove("active"); };
+loadSession();
 </script>
 </body>
 </html>
