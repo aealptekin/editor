@@ -6,14 +6,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1e1e1e">
-    
     <title>ProCode Editor</title>
-    
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-    
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    
     <style>
         * {
             -webkit-tap-highlight-color: transparent;
@@ -32,301 +28,228 @@
             --tab-bg: #2d2d2d;
             --tab-active: #1e1e1e;
             --button: #0e639c;
-            --editor-font: 'Menlo', 'Monaco', 'Courier New', monospace;
-            --font-size: 14px;
-            --header-h: 36px;
-            --tab-h: 32px;
-            --toolbar-h: 40px;
-        }
-
-        .light {
-            --bg: #ffffff;
-            --header: #f3f3f3;
-            --accent: #0078d4;
-            --border: #e0e0e0;
-            --text: #333333;
-            --text-muted: #808080;
-            --tab-bg: #ececec;
-            --tab-active: #ffffff;
-            --button: #0078d4;
         }
 
         html, body {
             height: 100%;
-            height: 100dvh;
-            overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
             color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            overflow: hidden;
         }
 
-        .app {
+        #app {
             display: flex;
             flex-direction: column;
-            height: 100%;
+            height: 100vh;
+            height: 100dvh;
         }
 
-        .header {
-            height: var(--header-h);
+        /* Header - Çentik destekli */
+        #header {
             background: var(--header);
             border-bottom: 1px solid var(--border);
+            padding: 8px 12px;
+            padding-top: max(12px, env(safe-area-inset-top));
             display: flex;
             align-items: center;
-            padding: 0 10px;
-            gap: 8px;
+            gap: 10px;
             flex-shrink: 0;
+            z-index: 100;
         }
 
-        .filename-input {
+        #filename {
             flex: 1;
             background: transparent;
-            border: 1px solid transparent;
+            border: 1px solid var(--border);
             color: var(--text);
-            font-size: 13px;
-            padding: 4px 6px;
-            border-radius: 4px;
+            font-size: 14px;
+            padding: 6px 10px;
+            border-radius: 6px;
             outline: none;
-            font-family: inherit;
         }
 
-        .filename-input:focus {
+        #filename:focus {
             border-color: var(--accent);
-            background: var(--bg);
         }
 
-        .btn {
-            height: 26px;
-            padding: 0 10px;
+        .icon-btn {
+            width: 34px;
+            height: 34px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             background: var(--button);
             color: white;
-            font-size: 12px;
-            font-weight: 500;
+            font-size: 16px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .btn:active { opacity: 0.8; }
-        .btn.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .icon-btn.secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+        }
 
-        .tabs-bar {
-            height: var(--tab-h);
+        /* Sekmeler - Çalışan haliyle */
+        #tabs-container {
             background: var(--tab-bg);
+            border-bottom: 1px solid var(--border);
             display: flex;
             overflow-x: auto;
             scrollbar-width: none;
-            border-bottom: 1px solid var(--border);
             flex-shrink: 0;
         }
 
-        .tabs-bar::-webkit-scrollbar { display: none; }
-
-        .tabs-list { display: flex; }
+        #tabs-container::-webkit-scrollbar {
+            display: none;
+        }
 
         .tab {
-            padding: 0 12px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            padding: 10px 16px;
+            font-size: 13px;
             background: var(--tab-bg);
             border-right: 1px solid var(--border);
             cursor: pointer;
-            font-size: 12px;
-            max-width: 140px;
-            min-width: 80px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
             user-select: none;
+            max-width: 150px;
         }
 
         .tab.active {
             background: var(--tab-active);
             border-bottom: 2px solid var(--accent);
-        }
-
-        .tab-name {
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            font-weight: 600;
         }
 
         .tab-close {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 3px;
-            font-size: 14px;
+            border-radius: 4px;
+            font-size: 15px;
             margin-left: 4px;
         }
 
-        .tab-close:active { background: #ff3b30; color: white; }
+        .tab-close:active {
+            background: rgba(255,255,255,0.2);
+        }
 
-        .new-tab-btn {
-            width: 32px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        #new-tab-btn {
+            padding: 10px 16px;
             background: transparent;
             border: none;
             color: var(--text);
-            font-size: 18px;
+            font-size: 20px;
             cursor: pointer;
-            flex-shrink: 0;
         }
 
-        .new-tab-btn:active { background: rgba(255,255,255,0.1); }
-
-        .editor-area {
+        /* Editor Alanı */
+        #editor-area {
             flex: 1;
             display: flex;
             overflow: hidden;
             position: relative;
+            margin-bottom: calc(44px + env(safe-area-inset-bottom));
         }
-
-        .line-numbers {
-            width: 36px;
-            background: var(--bg);
-            border-right: 1px solid var(--border);
-            padding: 8px 4px;
-            font-family: var(--editor-font);
-            font-size: var(--font-size);
-            line-height: 1.5;
-            color: var(--text-muted);
-            text-align: right;
-            overflow: hidden;
-            user-select: none;
-            flex-shrink: 0;
-        }
-
-        .editor-wrap { flex: 1; position: relative; overflow: hidden; }
 
         textarea {
+            flex: 1;
             width: 100%;
             height: 100%;
             border: none;
-            outline: none;
-            padding: 8px;
-            font-family: var(--editor-font);
-            font-size: var(--font-size);
+            padding: 12px;
+            font-family: 'Menlo', 'Monaco', monospace;
+            font-size: 14px;
             line-height: 1.5;
             background: var(--bg);
             color: var(--text);
             resize: none;
+            outline: none;
             tab-size: 4;
-            -webkit-user-select: text;
-            user-select: text;
-            white-space: pre;
-            overflow: auto;
         }
 
-        textarea::selection { background: rgba(0, 122, 204, 0.4); }
-        textarea::-webkit-scrollbar { width: 10px; height: 10px; }
-        textarea::-webkit-scrollbar-track { background: transparent; }
-        textarea::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; border: 2px solid var(--bg); }
-
-        .toolbar-container {
+        /* Toolbar - Klavye üstünde sabit */
+        #toolbar {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
+            height: 44px;
             background: var(--header);
             border-top: 1px solid var(--border);
-            z-index: 100;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        .toolbar {
-            height: var(--toolbar-h);
             display: flex;
-            gap: 4px;
-            padding: 4px;
+            align-items: center;
+            padding: 0 8px;
+            gap: 6px;
             overflow-x: auto;
-            scrollbar-width: none;
+            padding-bottom: env(safe-area-inset-bottom);
+            z-index: 1000;
         }
 
-        .toolbar::-webkit-scrollbar { display: none; }
+        #toolbar::-webkit-scrollbar {
+            display: none;
+        }
 
         .tool-btn {
             height: 32px;
             padding: 0 12px;
-            background: var(--tab-bg);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            color: var(--text);
-            font-family: var(--editor-font);
+            background: #3c3c3c;
+            border: 1px solid #505050;
+            color: white;
+            border-radius: 6px;
+            font-family: monospace;
             font-size: 13px;
             cursor: pointer;
             white-space: nowrap;
         }
 
-        .tool-btn:active { background: var(--accent); color: white; }
-
-        .nav-float {
-            position: fixed;
-            right: 10px;
-            bottom: calc(var(--toolbar-h) + 10px + env(safe-area-inset-bottom));
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            z-index: 90;
-        }
-
-        .nav-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+        .tool-btn:active {
             background: var(--accent);
-            color: white;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-            opacity: 0.9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
-        .nav-btn:active { opacity: 1; transform: scale(0.95); }
-
-        .menu-overlay {
+        /* Menü - Düzgün konumlu */
+        #menu-overlay {
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,0.5);
             display: none;
-            z-index: 1000;
+            z-index: 2000;
         }
 
-        .menu-overlay.show { display: block; }
+        #menu-overlay.show {
+            display: block;
+        }
 
-        .menu {
-            position: absolute;
-            top: calc(env(safe-area-inset-top) + 40px);
+        #menu {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 50px);
             right: 10px;
-            background: var(--header);
+            background: #2d2d2d;
             border: 1px solid var(--border);
-            border-radius: 8px;
-            min-width: 200px;
-            max-height: 70vh;
+            border-radius: 12px;
+            min-width: 220px;
+            max-height: 80vh;
             overflow-y: auto;
             display: none;
             flex-direction: column;
-            z-index: 1001;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            z-index: 2001;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .menu.show { display: flex; }
+        #menu.show {
+            display: flex;
+        }
 
         .menu-item {
-            padding: 12px 16px;
-            font-size: 14px;
+            padding: 14px 16px;
+            font-size: 15px;
             background: transparent;
             border: none;
             border-bottom: 1px solid var(--border);
@@ -336,311 +259,219 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 100%;
-            font-family: inherit;
         }
 
-        .menu-item:last-child { border-bottom: none; }
-        .menu-item:active { background: var(--accent); color: white; }
-        .menu-item.danger { color: #ff3b30; }
-        .menu-item.danger:active { background: #ff3b30; color: white; }
-
-        .key-hint {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-left: 12px;
+        .menu-item:last-child {
+            border-bottom: none;
         }
 
-        .menu-item:active .key-hint { color: rgba(255,255,255,0.7); }
+        .menu-item:active {
+            background: var(--accent);
+        }
 
-        .search-box {
+        .menu-item.red {
+            color: #ff6b6b;
+        }
+
+        /* Arama */
+        #search-modal {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: var(--header);
+            background: #2d2d2d;
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
+            border-radius: 12px;
+            padding: 20px;
             width: 90%;
-            max-width: 320px;
+            max-width: 340px;
             display: none;
             flex-direction: column;
-            gap: 10px;
-            z-index: 2000;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            gap: 12px;
+            z-index: 3000;
         }
 
-        .search-box.show { display: flex; }
-
-        .search-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 4px;
+        #search-modal.show {
+            display: flex;
         }
 
         .search-input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background: var(--bg);
             border: 1px solid var(--border);
-            border-radius: 4px;
-            color: var(--text);
-            font-size: 15px;
-            outline: none;
-            font-family: inherit;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
         }
 
-        .search-input:focus { border-color: var(--accent); }
-
-        .search-actions {
+        .search-row {
             display: flex;
-            gap: 6px;
-            margin-top: 4px;
+            gap: 8px;
         }
 
         .search-btn {
             flex: 1;
             padding: 10px;
-            border: 1px solid var(--border);
-            background: var(--tab-bg);
-            color: var(--text);
-            border-radius: 4px;
-            font-size: 13px;
-            cursor: pointer;
-            font-family: inherit;
-        }
-
-        .search-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
-        .search-btn:active { opacity: 0.8; }
-
-        .toast {
-            position: fixed;
-            bottom: calc(var(--toolbar-h) + 60px);
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--accent);
+            background: #3c3c3c;
+            border: 1px solid #505050;
             color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            opacity: 0;
-            transition: all 0.3s;
-            z-index: 3000;
-            pointer-events: none;
+            border-radius: 6px;
+            cursor: pointer;
         }
 
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
+        .search-btn.primary {
+            background: var(--accent);
         }
 
-        .preview-modal {
+        /* Önizleme */
+        #preview-modal {
             position: fixed;
             inset: 0;
-            background: var(--bg);
+            background: white;
             display: none;
             flex-direction: column;
-            z-index: 5000;
+            z-index: 4000;
         }
 
-        .preview-modal.show { display: flex; }
+        #preview-modal.show {
+            display: flex;
+        }
 
-        .preview-header {
-            height: var(--header-h);
+        #preview-header {
+            height: 50px;
             background: var(--header);
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 12px;
+            padding: 0 16px;
+            padding-top: env(safe-area-inset-top);
         }
 
-        .preview-frame {
+        #preview-frame {
             flex: 1;
             border: none;
             background: white;
         }
 
-        .content-spacer {
-            height: calc(var(--toolbar-h) + env(safe-area-inset-bottom));
-            flex-shrink: 0;
-        }
-
-        input[type="file"] { display: none; }
-        
-        .divider {
-            height: 1px;
-            background: var(--border);
-            margin: 4px 0;
-        }
+        .hidden { display: none !important; }
     </style>
 </head>
-<body class="dark">
-    <div class="app">
-        <header class="header">
-            <input type="text" class="filename-input" id="filename" value="new.txt">
-            <div style="display:flex;gap:6px;">
-                <button class="btn secondary" id="menuBtn">☰</button>
-                <button class="btn" id="previewBtn">▶</button>
-            </div>
-        </header>
-
-        <div class="tabs-bar">
-            <div class="tabs-list" id="tabsList"></div>
-            <button class="new-tab-btn" id="newTabBtn">+</button>
+<body>
+    <div id="app">
+        <div id="header">
+            <input type="text" id="filename" value="new.txt">
+            <button class="icon-btn secondary" id="menu-btn">☰</button>
+            <button class="icon-btn" id="preview-btn">▶</button>
         </div>
 
-        <div class="editor-area">
-            <div class="line-numbers" id="lineNums">1</div>
-            <div class="editor-wrap">
-                <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>
-            </div>
+        <div id="tabs-container">
+            <!-- Sekmeler buraya -->
+            <button id="new-tab-btn">+</button>
         </div>
 
-        <div class="content-spacer"></div>
-    </div>
-
-    <div class="toolbar-container">
-        <div class="toolbar">
-            <button class="tool-btn" data-char="\t">Tab</button>
-            <button class="tool-btn" data-char="<">&lt;</button>
-            <button class="tool-btn" data-char=">">&gt;</button>
-            <button class="tool-btn" data-char="/">/</button>
-            <button class="tool-btn" data-char="{">{</button>
-            <button class="tool-btn" data-char="}">}</button>
-            <button class="tool-btn" data-char="(">(</button>
-            <button class="tool-btn" data-char=")">)</button>
-            <button class="tool-btn" data-char=";">;</button>
-            <button class="tool-btn" data-char="=">=</button>
-            <button class="tool-btn" data-char='"'>"</button>
-            <button class="tool-btn" data-char="'">'</button>
+        <div id="editor-area">
+            <textarea id="editor" spellcheck="false" autocapitalize="off"></textarea>
         </div>
     </div>
 
-    <div class="nav-float">
-        <button class="nav-btn" data-nav="top">⤒</button>
-        <button class="nav-btn" data-nav="up">↑</button>
-        <button class="nav-btn" data-nav="down">↓</button>
-        <button class="nav-btn" data-nav="bottom">⤓</button>
+    <!-- Toolbar -->
+    <div id="toolbar">
+        <button class="tool-btn" data-char="\t">Tab</button>
+        <button class="tool-btn" data-char="<">&lt;</button>
+        <button class="tool-btn" data-char=">">&gt;</button>
+        <button class="tool-btn" data-char="/">/</button>
+        <button class="tool-btn" data-char="{">{</button>
+        <button class="tool-btn" data-char="}">}</button>
+        <button class="tool-btn" data-char="(">(</button>
+        <button class="tool-btn" data-char=")">)</button>
+        <button class="tool-btn" data-char=";">;</button>
+        <button class="tool-btn" data-char="=">=</button>
+        <button class="tool-btn" data-char='"'>"</button>
     </div>
 
-    <div class="menu-overlay" id="menuOverlay"></div>
-    <div class="menu" id="mainMenu">
-        <button class="menu-item" data-action="open">
-            <span>Aç...</span><span class="key-hint">Ctrl+O</span>
-        </button>
-        <button class="menu-item" data-action="openZip">
-            <span>ZIP Aç...</span>
-        </button>
-        <button class="menu-item" data-action="save">
-            <span>Kaydet</span><span class="key-hint">Ctrl+S</span>
-        </button>
-        <button class="menu-item" data-action="saveZip">
-            <span>ZIP Kaydet</span>
-        </button>
-        <div class="divider"></div>
-        <button class="menu-item" data-action="undo">
-            <span>Geri Al</span><span class="key-hint">Ctrl+Z</span>
-        </button>
-        <button class="menu-item" data-action="redo">
-            <span>İleri Al</span><span class="key-hint">Ctrl+Y</span>
-        </button>
-        <div class="divider"></div>
-        <button class="menu-item" data-action="search">
-            <span>Bul / Değiştir</span><span class="key-hint">Ctrl+F</span>
-        </button>
-        <button class="menu-item" data-action="goto">
-            <span>Satıra Git</span>
-        </button>
-        <button class="menu-item" data-action="font">
-            <span>Yazı Boyutu</span>
-        </button>
-        <button class="menu-item" data-action="theme">
-            <span>Tema Değiştir</span>
-        </button>
-        <div class="divider"></div>
-        <button class="menu-item" data-action="selectAll">Tümünü Seç</button>
-        <button class="menu-item" data-action="copy">Kopyala</button>
-        <button class="menu-item" data-action="cut">Kes</button>
-        <button class="menu-item" data-action="paste">Yapıştır</button>
-        <button class="menu-item danger" data-action="clear">Tümünü Sil</button>
+    <!-- Menü -->
+    <div id="menu-overlay"></div>
+    <div id="menu">
+        <button class="menu-item" data-action="open">Aç...</button>
+        <button class="menu-item" data-action="open-zip">ZIP Aç...</button>
+        <button class="menu-item" data-action="save">Kaydet</button>
+        <button class="menu-item" data-action="save-zip">ZIP Kaydet</button>
+        <button class="menu-item" data-action="undo">Geri Al</button>
+        <button class="menu-item" data-action="redo">İleri Al</button>
+        <button class="menu-item" data-action="search">Bul/Değiştir</button>
+        <button class="menu-item" data-action="select-all">Tümünü Seç</button>
+        <button class="menu-item red" data-action="clear">Tümünü Sil</button>
     </div>
 
-    <div class="search-box" id="searchBox">
-        <div class="search-title">Bul ve Değiştir</div>
-        <input type="text" class="search-input" id="findText" placeholder="Ara...">
-        <input type="text" class="search-input" id="replaceText" placeholder="Değiştir...">
-        <div class="search-actions">
-            <button class="search-btn" id="closeSearch">Kapat</button>
-            <button class="search-btn" id="findPrev">← Önceki</button>
-            <button class="search-btn primary" id="findNext">Sonraki →</button>
+    <!-- Arama -->
+    <div id="menu-overlay" class="hidden" id="search-overlay"></div>
+    <div id="search-modal">
+        <input type="text" class="search-input" id="find-input" placeholder="Ara...">
+        <input type="text" class="search-input" id="replace-input" placeholder="Değiştir...">
+        <div class="search-row">
+            <button class="search-btn" id="close-search">Kapat</button>
+            <button class="search-btn" id="prev-btn">Önceki</button>
+            <button class="search-btn primary" id="next-btn">Sonraki</button>
         </div>
-        <div class="search-actions">
-            <button class="search-btn" id="replaceOne">Değiştir</button>
-            <button class="search-btn primary" id="replaceAll">Tümünü Değiştir</button>
+        <div class="search-row">
+            <button class="search-btn" id="replace-btn">Değiştir</button>
+            <button class="search-btn primary" id="replace-all-btn">Tümünü Değiştir</button>
         </div>
     </div>
 
-    <div class="preview-modal" id="previewModal">
-        <div class="preview-header">
+    <!-- Önizleme -->
+    <div id="preview-modal">
+        <div id="preview-header">
             <b>Önizleme</b>
-            <button class="btn secondary" id="closePreview">Kapat</button>
+            <button class="icon-btn" id="close-preview">Kapat</button>
         </div>
-        <iframe class="preview-frame" id="previewFrame"></iframe>
+        <iframe id="preview-frame"></iframe>
     </div>
 
-    <div class="toast" id="toast"></div>
-    <input type="file" id="fileInput" accept=".txt,.html,.js,.css,.json,.md,.csv,.php,.py,.zip">
-    <input type="file" id="zipInput" accept=".zip" style="display:none">
+    <input type="file" id="file-input" accept=".txt,.html,.js,.css,.json,.md,.py,.php,.zip" style="display:none">
+    <input type="file" id="zip-input" accept=".zip" style="display:none">
 
     <script>
-        // Uygulama Sınıfı
-        class ProCodeEditor {
-            constructor() {
-                this.tabs = [];
-                this.activeId = null;
-                this.counter = 0;
-                this.history = new Map();
-                this.currentZip = null;
-                this.init();
-            }
-
+        // Uygulama State
+        const App = {
+            tabs: [],
+            activeTab: null,
+            tabIdCounter: 0,
+            history: new Map(),
+            zipFile: null,
+            
             init() {
                 this.cacheDOM();
                 this.bindEvents();
-                this.setupTheme();
                 this.newTab();
                 this.registerSW();
-            }
-
+            },
+            
             cacheDOM() {
                 this.dom = {
                     editor: document.getElementById('editor'),
-                    lineNums: document.getElementById('lineNums'),
                     filename: document.getElementById('filename'),
-                    tabsList: document.getElementById('tabsList'),
-                    menu: document.getElementById('mainMenu'),
-                    menuOverlay: document.getElementById('menuOverlay'),
-                    searchBox: document.getElementById('searchBox'),
-                    previewModal: document.getElementById('previewModal'),
-                    toast: document.getElementById('toast'),
-                    fileInput: document.getElementById('fileInput'),
-                    zipInput: document.getElementById('zipInput'),
-                    findText: document.getElementById('findText'),
-                    replaceText: document.getElementById('replaceText'),
-                    previewFrame: document.getElementById('previewFrame')
+                    tabsContainer: document.getElementById('tabs-container'),
+                    newTabBtn: document.getElementById('new-tab-btn'),
+                    menu: document.getElementById('menu'),
+                    menuOverlay: document.getElementById('menu-overlay'),
+                    searchModal: document.getElementById('search-modal'),
+                    previewModal: document.getElementById('preview-modal'),
+                    previewFrame: document.getElementById('preview-frame'),
+                    findInput: document.getElementById('find-input'),
+                    replaceInput: document.getElementById('replace-input'),
+                    fileInput: document.getElementById('file-input'),
+                    zipInput: document.getElementById('zip-input')
                 };
-            }
-
+            },
+            
             bindEvents() {
-                // Editor
-                this.dom.editor.addEventListener('input', () => this.onInput());
-                this.dom.editor.addEventListener('scroll', () => {
-                    this.dom.lineNums.scrollTop = this.dom.editor.scrollTop;
-                });
-
-                // Filename rename
+                // Sekme oluştur
+                this.dom.newTabBtn.addEventListener('click', () => this.newTab());
+                
+                // Dosya adı değişimi
                 this.dom.filename.addEventListener('change', (e) => {
                     const tab = this.getActiveTab();
                     if(tab) {
@@ -648,309 +479,271 @@
                         this.renderTabs();
                     }
                 });
-
-                // Buttons
-                document.getElementById('menuBtn').addEventListener('click', () => this.toggleMenu());
-                document.getElementById('previewBtn').addEventListener('click', () => this.togglePreview());
-                document.getElementById('newTabBtn').addEventListener('click', () => this.newTab());
-                document.getElementById('closePreview').addEventListener('click', () => this.togglePreview());
+                
+                // Editor input
+                this.dom.editor.addEventListener('input', () => {
+                    const tab = this.getActiveTab();
+                    if(tab) {
+                        tab.content = this.dom.editor.value;
+                        tab.modified = true;
+                        this.debounceHistory();
+                        this.renderTabs();
+                    }
+                });
+                
+                // Toolbar butonları
+                document.querySelectorAll('.tool-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const char = btn.dataset.char;
+                        if(char === '\\t') this.insertText('\t');
+                        else this.insertText(char);
+                    });
+                });
+                
+                // Menü aç/kapat
+                document.getElementById('menu-btn').addEventListener('click', () => this.toggleMenu());
                 this.dom.menuOverlay.addEventListener('click', () => this.toggleMenu());
-
-                // Menu items
+                
+                // Menü öğeleri
                 this.dom.menu.addEventListener('click', (e) => {
                     const item = e.target.closest('.menu-item');
                     if(item) this.handleMenuAction(item.dataset.action);
                 });
-
-                // Toolbar
-                document.querySelectorAll('.tool-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        this.insertText(btn.dataset.char);
-                    });
-                });
-
-                // Navigation
-                document.querySelectorAll('.nav-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        this.scrollEditor(btn.dataset.nav);
-                    });
-                });
-
-                // Search
-                document.getElementById('closeSearch').addEventListener('click', () => this.closeSearch());
-                document.getElementById('findNext').addEventListener('click', () => this.findNext());
-                document.getElementById('findPrev').addEventListener('click', () => this.findPrev());
-                document.getElementById('replaceOne').addEventListener('click', () => this.replaceOne());
-                document.getElementById('replaceAll').addEventListener('click', () => this.replaceAll());
                 
-                this.dom.findText.addEventListener('keypress', (e) => {
-                    if(e.key === 'Enter') this.findNext();
-                });
-
-                // File inputs
+                // Arama
+                document.getElementById('close-search').addEventListener('click', () => this.closeSearch());
+                document.getElementById('next-btn').addEventListener('click', () => this.findNext());
+                document.getElementById('prev-btn').addEventListener('click', () => this.findPrev());
+                document.getElementById('replace-btn').addEventListener('click', () => this.replaceOne());
+                document.getElementById('replace-all-btn').addEventListener('click', () => this.replaceAll());
+                
+                // Önizleme
+                document.getElementById('preview-btn').addEventListener('click', () => this.togglePreview());
+                document.getElementById('close-preview').addEventListener('click', () => this.togglePreview());
+                
+                // Dosya inputları
                 this.dom.fileInput.addEventListener('change', (e) => this.handleFile(e.target.files[0]));
                 this.dom.zipInput.addEventListener('change', (e) => this.handleZipFile(e.target.files[0]));
-
-                // Keyboard shortcuts
-                document.addEventListener('keydown', (e) => this.handleKeydown(e));
-            }
-
-            registerSW() {
-                if('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('sw.js')
-                        .then(reg => console.log('SW registered:', reg))
-                        .catch(err => console.log('SW error:', err));
-                }
-            }
-
-            setupTheme() {
-                const theme = localStorage.getItem('procode-theme');
-                const fontSize = localStorage.getItem('procode-font');
                 
-                if(theme === 'light') {
-                    document.body.classList.remove('dark');
-                    document.body.classList.add('light');
-                    document.querySelector('meta[name="theme-color"]').content = '#ffffff';
-                }
-                
-                if(fontSize) {
-                    document.documentElement.style.setProperty('--font-size', fontSize + 'px');
-                }
-            }
-
-            // Tab Management
-            newTab(name='new.txt', content='', zipEntry=null) {
-                this.counter++;
-                const id = this.counter;
-                this.tabs.push({id, name, content, zipEntry});
-                this.history.set(id, {stack: [content], idx: 0});
-                this.renderTabs();
-                this.switchTab(id);
-                return id;
-            }
-
-            renderTabs() {
-                this.dom.tabsList.innerHTML = '';
-                this.tabs.forEach(tab => {
-                    const div = document.createElement('div');
-                    div.className = 'tab' + (tab.id === this.activeId ? ' active' : '');
-                    div.innerHTML = `
-                        <span class="tab-name">${tab.name}${tab.modified ? ' •' : ''}</span>
-                        <span class="tab-close" data-id="${tab.id}">×</span>
-                    `;
-                    
-                    div.querySelector('.tab-name').addEventListener('click', () => this.switchTab(tab.id));
-                    div.querySelector('.tab-close').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        this.closeTab(tab.id);
-                    });
-                    
-                    this.dom.tabsList.appendChild(div);
+                // Klavye kısayolları
+                document.addEventListener('keydown', (e) => {
+                    if((e.ctrlKey || e.metaKey) && e.key === 's') {
+                        e.preventDefault();
+                        this.saveFile();
+                    }
+                    if((e.ctrlKey || e.metaKey) && e.key === 'o') {
+                        e.preventDefault();
+                        this.openFile();
+                    }
+                    if((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                        e.preventDefault();
+                        this.openSearch();
+                    }
                 });
-            }
-
+            },
+            
+            newTab(name = 'new.txt', content = '') {
+                this.tabIdCounter++;
+                const tab = {
+                    id: this.tabIdCounter,
+                    name: name,
+                    content: content,
+                    modified: false
+                };
+                this.tabs.push(tab);
+                this.history.set(tab.id, {stack: [content], index: 0});
+                this.switchTab(tab.id);
+            },
+            
             switchTab(id) {
+                // Mevcut içeriği kaydet
                 const current = this.getActiveTab();
                 if(current) current.content = this.dom.editor.value;
                 
-                this.activeId = id;
+                this.activeTab = id;
                 const tab = this.tabs.find(t => t.id === id);
                 if(!tab) return;
                 
                 this.dom.editor.value = tab.content;
                 this.dom.filename.value = tab.name;
-                this.updateLineNumbers();
                 this.renderTabs();
-            }
-
+            },
+            
             closeTab(id) {
-                if(this.tabs.length <= 1) {
-                    this.showToast('Son sekme kapatılamaz');
-                    return;
-                }
+                if(this.tabs.length <= 1) return;
                 
                 this.tabs = this.tabs.filter(t => t.id !== id);
                 this.history.delete(id);
                 
-                if(this.activeId === id) {
+                if(this.activeTab === id) {
                     this.switchTab(this.tabs[this.tabs.length - 1].id);
                 } else {
                     this.renderTabs();
                 }
-            }
-
-            getActiveTab() {
-                return this.tabs.find(t => t.id === this.activeId);
-            }
-
-            // Editor Operations
-            onInput() {
-                this.updateLineNumbers();
-                this.debounceHistory();
-                const tab = this.getActiveTab();
-                if(tab) {
-                    tab.content = this.dom.editor.value;
-                    if(!tab.modified) {
-                        tab.modified = true;
-                        this.renderTabs();
-                    }
-                }
-            }
-
-            updateLineNumbers() {
-                const lines = this.dom.editor.value.split('\n').length;
-                this.dom.lineNums.innerHTML = Array(lines).fill(0).map((_,i) => i+1).join('<br>');
-            }
-
-            insertText(text) {
-                const editor = this.dom.editor;
-                const start = editor.selectionStart;
-                const end = editor.selectionEnd;
-                editor.setRangeText(text, start, end, 'end');
-                editor.focus();
-                editor.dispatchEvent(new Event('input'));
-            }
-
-            scrollEditor(dir) {
-                const editor = this.dom.editor;
-                const lineHeight = 21;
-                const visible = Math.floor(editor.clientHeight / lineHeight);
+            },
+            
+            renderTabs() {
+                // Mevcut sekmeleri temizle (new-tab-btn hariç)
+                const existingTabs = this.dom.tabsContainer.querySelectorAll('.tab');
+                existingTabs.forEach(t => t.remove());
                 
-                switch(dir) {
-                    case 'top':
-                        editor.scrollTo({top: 0, behavior: 'smooth'});
-                        editor.setSelectionRange(0, 0);
-                        break;
-                    case 'bottom':
-                        editor.scrollTo({top: editor.scrollHeight, behavior: 'smooth'});
-                        const len = editor.value.length;
-                        editor.setSelectionRange(len, len);
-                        break;
-                    case 'up':
-                        editor.scrollBy({top: -(visible * lineHeight) + 20, behavior: 'smooth'});
-                        break;
-                    case 'down':
-                        editor.scrollBy({top: (visible * lineHeight) - 20, behavior: 'smooth'});
-                        break;
-                }
-            }
-
-            // History (Undo/Redo)
+                // Sekmeleri oluştur
+                this.tabs.forEach(tab => {
+                    const div = document.createElement('div');
+                    div.className = 'tab' + (tab.id === this.activeTab ? ' active' : '');
+                    div.innerHTML = `
+                        <span>${tab.name}${tab.modified ? ' •' : ''}</span>
+                        <span class="tab-close" data-id="${tab.id}">×</span>
+                    `;
+                    
+                    div.addEventListener('click', (e) => {
+                        if(e.target.classList.contains('tab-close')) {
+                            e.stopPropagation();
+                            this.closeTab(tab.id);
+                        } else {
+                            this.switchTab(tab.id);
+                        }
+                    });
+                    
+                    this.dom.tabsContainer.insertBefore(div, this.dom.newTabBtn);
+                });
+            },
+            
+            getActiveTab() {
+                return this.tabs.find(t => t.id === this.activeTab);
+            },
+            
+            insertText(text) {
+                const ed = this.dom.editor;
+                const start = ed.selectionStart;
+                const end = ed.selectionEnd;
+                ed.setRangeText(text, start, end, 'end');
+                ed.focus();
+                ed.dispatchEvent(new Event('input'));
+            },
+            
             debounceHistory() {
                 clearTimeout(this.historyTimer);
-                this.historyTimer = setTimeout(() => this.saveHistory(), 400);
-            }
-
+                this.historyTimer = setTimeout(() => this.saveHistory(), 500);
+            },
+            
             saveHistory() {
                 const tab = this.getActiveTab();
                 if(!tab) return;
                 
                 const h = this.history.get(tab.id);
-                if(!h || h.stack[h.idx] === this.dom.editor.value) return;
+                if(h.stack[h.index] === this.dom.editor.value) return;
                 
-                if(h.idx < h.stack.length - 1) {
-                    h.stack = h.stack.slice(0, h.idx + 1);
+                if(h.index < h.stack.length - 1) {
+                    h.stack = h.stack.slice(0, h.index + 1);
                 }
-                
                 h.stack.push(this.dom.editor.value);
-                h.idx++;
-                
-                if(h.stack.length > 50) {
-                    h.stack.shift();
-                    h.idx--;
-                }
-            }
-
+                h.index++;
+                if(h.stack.length > 30) { h.stack.shift(); h.index--; }
+            },
+            
             undo() {
                 const tab = this.getActiveTab();
                 if(!tab) return;
                 const h = this.history.get(tab.id);
-                if(!h || h.idx <= 0) {
-                    this.showToast('Geri alma yok');
-                    return;
+                if(h.index > 0) {
+                    h.index--;
+                    this.dom.editor.value = h.stack[h.index];
+                    tab.content = h.stack[h.index];
+                    this.renderTabs();
                 }
-                h.idx--;
-                this.dom.editor.value = h.stack[h.idx];
-                tab.content = h.stack[h.idx];
-                this.updateLineNumbers();
-                this.showToast('Geri alındı');
-            }
-
+            },
+            
             redo() {
                 const tab = this.getActiveTab();
                 if(!tab) return;
                 const h = this.history.get(tab.id);
-                if(!h || h.idx >= h.stack.length - 1) {
-                    this.showToast('İleri alma yok');
-                    return;
+                if(h.index < h.stack.length - 1) {
+                    h.index++;
+                    this.dom.editor.value = h.stack[h.index];
+                    tab.content = h.stack[h.index];
+                    this.renderTabs();
                 }
-                h.idx++;
-                this.dom.editor.value = h.stack[h.idx];
-                tab.content = h.stack[h.idx];
-                this.updateLineNumbers();
-                this.showToast('İleri alındı');
-            }
-
-            // File Operations
+            },
+            
+            toggleMenu() {
+                const isOpen = this.dom.menu.classList.contains('show');
+                this.dom.menu.classList.toggle('show', !isOpen);
+                this.dom.menuOverlay.classList.toggle('show', !isOpen);
+            },
+            
+            handleMenuAction(action) {
+                this.toggleMenu();
+                switch(action) {
+                    case 'open': this.openFile(); break;
+                    case 'open-zip': this.openZip(); break;
+                    case 'save': this.saveFile(); break;
+                    case 'save-zip': this.saveAsZip(); break;
+                    case 'undo': this.undo(); break;
+                    case 'redo': this.redo(); break;
+                    case 'search': this.openSearch(); break;
+                    case 'select-all': 
+                        this.dom.editor.select(); 
+                        this.dom.editor.focus();
+                        break;
+                    case 'clear': 
+                        if(confirm('Tüm içerik silinsin mi?')) {
+                            this.dom.editor.value = '';
+                            this.dom.editor.dispatchEvent(new Event('input'));
+                        }
+                        break;
+                }
+            },
+            
+            openFile() {
+                this.dom.fileInput.click();
+            },
+            
+            openZip() {
+                this.dom.zipInput.click();
+            },
+            
             handleFile(file) {
                 if(!file) return;
-                
-                if(file.name.endsWith('.zip')) {
-                    this.handleZipFile(file);
-                } else {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.newTab(file.name, e.target.result);
-                        this.showToast(`${file.name} açıldı`);
-                    };
-                    reader.readAsText(file);
-                }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.newTab(file.name, e.target.result);
+                };
+                reader.readAsText(file);
                 this.dom.fileInput.value = '';
-            }
-
+            },
+            
             async handleZipFile(file) {
                 if(!file) return;
                 try {
                     const zip = await JSZip.loadAsync(file);
-                    this.currentZip = zip;
+                    this.zipFile = zip;
                     const files = Object.keys(zip.files).filter(f => !zip.files[f].dir);
                     if(files.length > 0) {
                         const content = await zip.files[files[0]].async('string');
-                        this.newTab(files[0], content, files[0]);
-                        this.showToast(`ZIP açıldı (${files.length} dosya)`);
+                        this.newTab(files[0], content);
                     }
-                } catch(err) {
-                    this.showToast('ZIP açılamadı');
-                    console.error(err);
-                }
+                } catch(e) { alert('ZIP hatası'); }
                 this.dom.zipInput.value = '';
-            }
-
+            },
+            
             saveFile() {
                 const tab = this.getActiveTab();
                 if(!tab) return;
-                
                 const blob = new Blob([this.dom.editor.value], {type: 'text/plain'});
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = tab.name;
-                document.body.appendChild(a);
                 a.click();
-                document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                
                 tab.modified = false;
                 this.renderTabs();
-                this.showToast('Kaydedildi');
-                this.toggleMenu();
-            }
-
+            },
+            
             async saveAsZip() {
                 const tab = this.getActiveTab();
                 if(!tab) return;
-                
                 const zip = new JSZip();
                 zip.file(tab.name, this.dom.editor.value);
                 const blob = await zip.generateAsync({type: 'blob'});
@@ -958,365 +751,90 @@
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = tab.name.replace(/\.[^/.]+$/, '') + '.zip';
-                document.body.appendChild(a);
                 a.click();
-                document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                this.showToast('ZIP kaydedildi');
-                this.toggleMenu();
-            }
-
-            // Menu & Actions
-            toggleMenu() {
-                const isOpen = this.dom.menu.classList.contains('show');
-                this.dom.menu.classList.toggle('show', !isOpen);
-                this.dom.menuOverlay.classList.toggle('show', !isOpen);
-            }
-
-            handleMenuAction(action) {
-                switch(action) {
-                    case 'open': 
-                        this.dom.fileInput.click(); 
-                        this.toggleMenu(); 
-                        break;
-                    case 'openZip': 
-                        this.dom.zipInput.click(); 
-                        this.toggleMenu(); 
-                        break;
-                    case 'save': 
-                        this.saveFile(); 
-                        break;
-                    case 'saveZip': 
-                        this.saveAsZip(); 
-                        break;
-                    case 'undo': 
-                        this.undo(); 
-                        this.toggleMenu(); 
-                        break;
-                    case 'redo': 
-                        this.redo(); 
-                        this.toggleMenu(); 
-                        break;
-                    case 'search': 
-                        this.openSearch(); 
-                        break;
-                    case 'goto': 
-                        this.gotoLine(); 
-                        this.toggleMenu(); 
-                        break;
-                    case 'font': 
-                        this.changeFont(); 
-                        this.toggleMenu(); 
-                        break;
-                    case 'theme': 
-                        this.toggleTheme(); 
-                        this.toggleMenu(); 
-                        break;
-                    case 'selectAll': 
-                        this.dom.editor.select(); 
-                        this.dom.editor.focus(); 
-                        this.toggleMenu(); 
-                        break;
-                    case 'copy': 
-                        this.copyText(); 
-                        break;
-                    case 'cut': 
-                        this.cutText(); 
-                        break;
-                    case 'paste': 
-                        this.pasteText(); 
-                        break;
-                    case 'clear': 
-                        this.clearEditor(); 
-                        break;
-                }
-            }
-
-            // Search
+            },
+            
             openSearch() {
-                this.dom.searchBox.classList.add('show');
-                this.dom.findText.focus();
-                this.toggleMenu();
-            }
-
+                this.dom.searchModal.classList.add('show');
+                this.dom.findInput.focus();
+            },
+            
             closeSearch() {
-                this.dom.searchBox.classList.remove('show');
-            }
-
+                this.dom.searchModal.classList.remove('show');
+            },
+            
             findNext() {
-                const text = this.dom.findText.value;
+                const text = this.dom.findInput.value;
                 if(!text) return;
-                
-                const editor = this.dom.editor;
-                const content = editor.value;
-                const start = editor.selectionEnd;
+                const content = this.dom.editor.value;
+                const start = this.dom.editor.selectionEnd;
                 let idx = content.indexOf(text, start);
-                
                 if(idx === -1) idx = content.indexOf(text);
-                if(idx === -1) {
-                    this.showToast('Bulunamadı');
-                    return;
-                }
+                if(idx === -1) return;
                 
-                this.scrollToIndex(idx, text.length);
-            }
-
+                this.dom.editor.setSelectionRange(idx, idx + text.length);
+                this.dom.editor.focus();
+                this.dom.editor.scrollTop = (content.substring(0, idx).split('\n').length - 1) * 21 - 100;
+            },
+            
             findPrev() {
-                const text = this.dom.findText.value;
+                const text = this.dom.findInput.value;
                 if(!text) return;
-                
-                const editor = this.dom.editor;
-                const content = editor.value;
-                let idx = content.lastIndexOf(text, editor.selectionStart - 1);
-                
+                const content = this.dom.editor.value;
+                let idx = content.lastIndexOf(text, this.dom.editor.selectionStart - 1);
                 if(idx === -1) idx = content.lastIndexOf(text);
-                if(idx === -1) {
-                    this.showToast('Bulunamadı');
-                    return;
-                }
+                if(idx === -1) return;
                 
-                this.scrollToIndex(idx, text.length);
-            }
-
-            scrollToIndex(idx, len) {
-                const editor = this.dom.editor;
-                editor.setSelectionRange(idx, idx + len);
-                
-                const lineHeight = 21;
-                const lines = editor.value.substring(0, idx).split('\n').length;
-                const scrollPos = (lines - 1) * lineHeight - editor.clientHeight / 2;
-                editor.scrollTop = Math.max(0, scrollPos);
-                editor.focus();
-            }
-
+                this.dom.editor.setSelectionRange(idx, idx + text.length);
+                this.dom.editor.focus();
+            },
+            
             replaceOne() {
-                const find = this.dom.findText.value;
-                const replace = this.dom.replaceText.value;
-                if(!find) return;
-                
-                const editor = this.dom.editor;
-                const sel = editor.value.substring(editor.selectionStart, editor.selectionEnd);
-                
-                if(sel === find) {
-                    editor.setRangeText(replace, editor.selectionStart, editor.selectionEnd, 'end');
-                    editor.dispatchEvent(new Event('input'));
-                }
-                this.findNext();
-            }
-
-            replaceAll() {
-                const find = this.dom.findText.value;
-                const replace = this.dom.replaceText.value;
-                if(!find) return;
-                
-                const editor = this.dom.editor;
-                const original = editor.value;
-                const regex = new RegExp(find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-                const result = original.replace(regex, replace);
-                
-                if(original !== result) {
-                    editor.value = result;
-                    editor.dispatchEvent(new Event('input'));
-                    this.showToast(`${original.split(find).length - 1} değişiklik yapıldı`);
-                }
-            }
-
-            gotoLine() {
-                const line = prompt('Satır numarası:');
-                if(!line) return;
-                
-                const num = parseInt(line);
-                if(isNaN(num) || num < 1) return;
-                
-                const lines = this.dom.editor.value.split('\n');
-                if(num > lines.length) {
-                    this.showToast('Geçersiz satır');
-                    return;
-                }
-                
-                let pos = 0;
-                for(let i = 0; i < num - 1; i++) {
-                    pos += lines[i].length + 1;
-                }
-                this.scrollToIndex(pos, 0);
-            }
-
-            // Clipboard
-            async copyText() {
-                const sel = this.dom.editor.value.substring(
+                const find = this.dom.findInput.value;
+                const replace = this.dom.replaceInput.value;
+                const selected = this.dom.editor.value.substring(
                     this.dom.editor.selectionStart, 
                     this.dom.editor.selectionEnd
                 );
-                if(sel) {
-                    try {
-                        await navigator.clipboard.writeText(sel);
-                        this.showToast('Kopyalandı');
-                    } catch(err) {
-                        this.showToast('Kopyalama başarısız');
-                    }
+                if(selected === find) {
+                    this.insertText(replace);
                 }
-                this.toggleMenu();
-            }
-
-            async cutText() {
-                const editor = this.dom.editor;
-                const start = editor.selectionStart;
-                const end = editor.selectionEnd;
-                const sel = editor.value.substring(start, end);
-                
-                if(sel) {
-                    try {
-                        await navigator.clipboard.writeText(sel);
-                        editor.setRangeText('', start, end, 'end');
-                        editor.dispatchEvent(new Event('input'));
-                        this.showToast('Kesildi');
-                    } catch(err) {
-                        this.showToast('Kesme başarısız');
-                    }
-                }
-                this.toggleMenu();
-            }
-
-            async pasteText() {
-                try {
-                    const text = await navigator.clipboard.readText();
-                    const editor = this.dom.editor;
-                    editor.setRangeText(text, editor.selectionStart, editor.selectionEnd, 'end');
-                    editor.dispatchEvent(new Event('input'));
-                    this.showToast('Yapıştırıldı');
-                } catch(err) {
-                    this.showToast('Erişim reddedildi');
-                }
-                this.toggleMenu();
-            }
-
-            clearEditor() {
-                if(confirm('Tüm içerik silinsin mi?')) {
-                    this.dom.editor.value = '';
-                    this.dom.editor.dispatchEvent(new Event('input'));
-                }
-                this.toggleMenu();
-            }
-
-            // UI Settings
-            changeFont() {
-                const sizes = [12, 13, 14, 15, 16, 18, 20];
-                const current = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-size')) || 14;
-                const idx = sizes.indexOf(current);
-                const next = sizes[(idx + 1) % sizes.length];
-                
-                document.documentElement.style.setProperty('--font-size', next + 'px');
-                localStorage.setItem('procode-font', next);
-                this.showToast(`Yazı boyutu: ${next}px`);
-            }
-
-            toggleTheme() {
-                const isDark = document.body.classList.contains('dark');
-                if(isDark) {
-                    document.body.classList.remove('dark');
-                    document.body.classList.add('light');
-                    localStorage.setItem('procode-theme', 'light');
-                    document.querySelector('meta[name="theme-color"]').content = '#ffffff';
-                    this.showToast('Açık tema');
-                } else {
-                    document.body.classList.remove('light');
-                    document.body.classList.add('dark');
-                    localStorage.setItem('procode-theme', 'dark');
-                    document.querySelector('meta[name="theme-color"]').content = '#1e1e1e';
-                    this.showToast('Koyu tema');
-                }
-            }
-
+                this.findNext();
+            },
+            
+            replaceAll() {
+                const find = this.dom.findInput.value;
+                const replace = this.dom.replaceInput.value;
+                const regex = new RegExp(find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                this.dom.editor.value = this.dom.editor.value.replace(regex, replace);
+                this.dom.editor.dispatchEvent(new Event('input'));
+            },
+            
             togglePreview() {
-                const modal = this.dom.previewModal;
-                const isOpen = modal.classList.contains('show');
-                
+                const isOpen = this.dom.previewModal.classList.contains('show');
                 if(!isOpen) {
                     const name = this.dom.filename.value;
                     const content = this.dom.editor.value;
-                    
                     if(name.match(/\.(html|htm)$/i)) {
                         this.dom.previewFrame.srcdoc = content;
                     } else {
-                        const escaped = content
-                            .replace(/&/g, '&amp;')
-                            .replace(/</g, '&lt;')
-                            .replace(/>/g, '&gt;')
-                            .replace(/\n/g, '<br>');
-                        this.dom.previewFrame.srcdoc = `<pre style="padding:20px;font-family:monospace;white-space:pre-wrap;word-wrap:break-word;">${escaped}</pre>`;
+                        this.dom.previewFrame.srcdoc = `<pre style="padding:20px;font-family:monospace;white-space:pre-wrap;">${content.replace(/</g,'&lt;')}</pre>`;
                     }
-                    modal.classList.add('show');
+                    this.dom.previewModal.classList.add('show');
                 } else {
-                    modal.classList.remove('show');
-                    this.dom.previewFrame.srcdoc = '';
+                    this.dom.previewModal.classList.remove('show');
+                }
+            },
+            
+            registerSW() {
+                if('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('sw.js');
                 }
             }
-
-            // Keyboard
-            handleKeydown(e) {
-                if(e.key === 'Tab') {
-                    e.preventDefault();
-                    this.insertText('    ');
-                    return;
-                }
-                
-                if(e.ctrlKey || e.metaKey) {
-                    switch(e.key.toLowerCase()) {
-                        case 's':
-                            e.preventDefault();
-                            if(e.shiftKey) this.saveAsZip();
-                            else this.saveFile();
-                            break;
-                        case 'o':
-                            e.preventDefault();
-                            this.dom.fileInput.click();
-                            break;
-                        case 'z':
-                            e.preventDefault();
-                            this.undo();
-                            break;
-                        case 'y':
-                            e.preventDefault();
-                            this.redo();
-                            break;
-                        case 'f':
-                            e.preventDefault();
-                            this.openSearch();
-                            break;
-                        case 'a':
-                            e.preventDefault();
-                            this.dom.editor.select();
-                            break;
-                        case 'n':
-                            e.preventDefault();
-                            this.newTab();
-                            break;
-                    }
-                }
-            }
-
-            // Utils
-            showToast(msg) {
-                this.dom.toast.textContent = msg;
-                this.dom.toast.classList.add('show');
-                setTimeout(() => {
-                    this.dom.toast.classList.remove('show');
-                }, 2000);
-            }
-        }
-
-        // Init
-        document.addEventListener('DOMContentLoaded', () => {
-            window.app = new ProCodeEditor();
-        });
-
-        // Before unload
-        window.addEventListener('beforeunload', (e) => {
-            if(window.app && window.app.tabs.some(t => t.modified)) {
-                e.preventDefault();
-                e.returnValue = 'Kaydedilmemiş değişiklikler var.';
-            }
-        });
+        };
+        
+        App.init();
     </script>
 </body>
 </html>
