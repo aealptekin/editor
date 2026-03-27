@@ -194,7 +194,6 @@
         }
         .nav-btn:active { opacity: 1; transform: scale(0.95); }
 
-        /* Menu */
         #menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 200; }
         #menu-overlay.show { display: block; }
         
@@ -234,7 +233,6 @@
         .menu-item.red:active { background: #ff6b6b; color: white; }
         .key-hint { font-size: 12px; color: var(--text-muted); margin-left: auto; padding-left: 20px; }
 
-        /* Search - KOMPAKT ve ORTADA */
         #search-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; z-index: 300; }
         #search-overlay.show { display: block; }
         
@@ -279,7 +277,6 @@
         }
         .search-btn.primary { background: var(--accent); }
 
-        /* Preview */
         #preview-modal { position: fixed; inset: 0; background: white; display: none; flex-direction: column; z-index: 400; }
         #preview-modal.show { display: flex; }
         #preview-header { height: 50px; background: var(--header); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; padding-top: env(safe-area-inset-top); }
@@ -373,7 +370,6 @@
     <input type="file" id="zip-input" accept=".zip">
 
     <script>
-        // Service Worker Kaydı (Dosya olarak)
         if('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
                 .then(reg => console.log('SW registered'))
@@ -528,7 +524,9 @@
                 });
             },
 
-            getActiveTab() { return this.tabs.find(t => t.id === this.activeTab); },
+            getActiveTab() { 
+                return this.tabs.find(t => t.id === this.activeTab); 
+            },
 
             updateLineNumbers() {
                 const lines = this.el.editor.value.split('\n').length;
@@ -618,7 +616,8 @@
                 const reader = new FileReader();
                 reader.onload = (e) => this.newTab(file.name, e.target.result);
                 reader.readAsText(file);
-                this.el.fileInput.
+                this.el.fileInput.value = '';
+            },
 
             async handleZip(file) {
                 if(!file) return;
@@ -635,7 +634,7 @@
                 }
                 this.el.zipInput.value = '';
             },
-            
+
             saveFile() {
                 const tab = this.getActiveTab();
                 if(!tab) return;
@@ -643,14 +642,10 @@
                 const fileName = tab.name;
                 const extension = fileName.split('.').pop().toLowerCase();
                 
-                // Dosya uzantılarına göre MIME type haritası
                 const mimeTypes = {
-                    // Metin ve Belge Dosyaları
                     'txt': 'text/plain',
                     'log': 'text/plain',
                     'md': 'text/markdown',
-                    
-                    // Web Dilleri
                     'html': 'text/html',
                     'htm': 'text/html',
                     'css': 'text/css',
@@ -658,25 +653,17 @@
                     'mjs': 'text/javascript',
                     'xml': 'application/xml',
                     'json': 'application/json',
-                    
-                    // C-Ailesi
                     'c': 'text/plain',
                     'cpp': 'text/plain',
                     'h': 'text/plain',
                     'cs': 'text/plain',
-                    
-                    // Scripting Dilleri
                     'py': 'text/x-python',
                     'php': 'text/x-php',
                     'rb': 'text/x-ruby',
-                    
-                    // Diğer Programlama Dilleri
                     'java': 'text/x-java',
                     'sh': 'text/x-shellscript',
                     'bash': 'text/x-shellscript',
                     'pl': 'text/x-perl',
-                    
-                    // Veritabanı ve Yapılandırma
                     'sql': 'text/x-sql',
                     'yaml': 'text/yaml',
                     'yml': 'text/yaml',
@@ -685,7 +672,6 @@
                     'conf': 'text/plain'
                 };
                 
-                // Varsayılan olarak text/plain kullan, uzantı bulunamazsa veya tanımlı değilse
                 const contentType = mimeTypes[extension] || 'text/plain';
                 
                 const blob = new Blob([this.el.editor.value], {type: contentType});
@@ -701,7 +687,7 @@
                 tab.modified = false;
                 this.renderTabs();
             },
-            
+
             async saveZip() {
                 const tab = this.getActiveTab();
                 if(!tab) return;
@@ -719,6 +705,7 @@
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             },
+
             openSearch() {
                 this.el.searchBox.classList.add('show');
                 this.el.searchOverlay.classList.add('show');
