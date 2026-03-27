@@ -83,7 +83,7 @@
     </style>
 </head>
 <body class="dark-theme"> <header>
-        <div class="file-name" id="fileNameDisplay">İsimsiz.txt</div>
+        <div class="file-name" id="fileNameDisplay">new.txt</div>
         <div style="display: flex; gap: 5px;">
             <button class="btn-icon" id="btnPreviewPlay" title="Önizleme">▶️</button>
             <button class="btn-icon" id="btnMenuToggle">•••</button>
@@ -204,7 +204,7 @@
         // SEKME YÖNETİMİ (SENİN ORİJİNAL HİSTORY MANTIĞINIZ)
         let tabs = [], activeTabId = null, tabCounter = 0, isProgrammaticChange = false;
 
-        function createTab(name = "İsimsiz.txt", content = "") {
+        function createTab(name = "new.txt", content = "") {
             tabCounter++;
             tabs.push({ id: tabCounter, name, content, history: [content], historyIndex: 0 });
             renderTabs(); switchTab(tabCounter);
@@ -296,7 +296,7 @@
         document.getElementById('menuSave').addEventListener('click', () => {
             const activeTab = tabs.find(t => t.id === activeTabId);
             // SENİN adını prompt İLE DEĞİŞTİRME MANTIĞIN (DEĞİŞTİRMEDİM)
-            if (activeTab.name === "İsimsiz.txt") {
+            if (activeTab.name === "new.txt") {
                 const newName = prompt("Dosya adı girin (Örn: not.html):", activeTab.name);
                 if (newName) activeTab.name = newName;
             }
